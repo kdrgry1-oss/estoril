@@ -54,8 +54,9 @@ elif [[ "$SRC_ARG" == *.zip ]]; then
   TMP_UNZIP="/opt/_facette_src_unzip"
   rm -rf "$TMP_UNZIP"; mkdir -p "$TMP_UNZIP"
   unzip -q -o "$SRC_ARG" -d "$TMP_UNZIP"
-  # backend/ ve frontend/ içeren dizini bul
-  SRC_DIR="$(dirname "$(find "$TMP_UNZIP" -maxdepth 3 -type d -name backend | head -1)")"
+  # requirements.txt içeren ASIL backend'i bul (zip'te facette_deploy/backend,
+  # .iys-backup*/backend gibi sahte kopyalar olabilir — onları eleriz)
+  SRC_DIR="$(dirname "$(dirname "$(find "$TMP_UNZIP" -type f -path '*/backend/requirements.txt' | head -1)")")"
 else
   die "Kaynak ne klasör ne de .zip: $SRC_ARG"
 fi
