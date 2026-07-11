@@ -3,6 +3,17 @@
 > Bu dosya kullanıcının **kesin ve kritik** talebidir. Her adımda bu kurallara uyulur.
 > Kullanıcı vurgusu: "bu konu benim için çok kritik."
 
+## GÜNCELLEME (kullanıcı yönü netleşti)
+Kritik kural **ESKİ Facette firmasının sistemine/verisine karşıydı** — onların canlı
+sistemine hiçbir Estoril verisi gitmeyecek, onların verisi de çekilmeyecek. AMA kullanıcının
+kendi sunucusundaki (185.126.216.28) **YEREL, boş** veritabanı tamamen Estoril'indir ve
+eski Facette ile sıfır bağlantısı vardır. Kullanıcı açık talebi:
+- "bu panel Estoril'in", "ürün/kategorileri panelin NORMAL alanlarına koy, ayrı alan açma"
+- "XML'den Estoril'in ürün ve kategorilerini çek, normal Ürünler/Kategoriler sayfalarına yaz"
+=> Estoril'in KENDİ ürün/kategorileri, kullanıcının KENDİ yerel Mongo'suna yazılabilir
+   (native sayfalardan yönetim için). Bu, "eski Facette'e veri gönderme" YASAĞINI ihlal ETMEZ.
+YASAK olan hâlâ: eski Facette firmasının canlı sistemi/verisi ile HERHANGİ bir alışveriş.
+
 ## 1. VERİ İZOLASYONU — Estoril verisi ASLA Facette'e gitmez
 - Estoril'in içeriği ve ürünleri **yalnızca JSON dosyalarında** tutulur:
   `site-content.json`, `products.json` (vitrin klasöründe / `ESTORIL_SITE_DIR`).
