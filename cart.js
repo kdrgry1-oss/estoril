@@ -105,7 +105,20 @@
     var row = btn.closest("div"); var b = row && row.querySelector("b, [style*='min-width:28px']");
     var q = b ? parseInt(b.textContent, 10) : 1; return q > 0 ? q : 1;
   }
+  function addByLink(link) {
+    var m = /[?&]i=(\d+)/.exec(link.getAttribute("href") || link.href || "");
+    var pi = m ? parseInt(m[1], 10) : -1;
+    var pp = PRODUCTS && PRODUCTS[pi];
+    if (pp) add({ name: pp.name, price: (pp.sale || pp.price || 0), img: pp.img || (pp.imgs && pp.imgs[0]) || "", qty: 1 });
+  }
   document.addEventListener("click", function (e) {
+    var t = e.target;
+    // 1) kart uzerindeki "+" hizli-ekle (a href=/urun?i= icinde)
+    if (t && t.closest && (t.textContent || "").trim() === "+") {
+      var link = t.closest('a[href*="/urun?i="]');
+      if (link) { e.preventDefault(); e.stopPropagation(); addByLink(link); return; }
+    }
+    // 2) urun sayfasi "Sepete Ekle"
     var el = e.target; while (el && el !== document.body) {
       if (el.textContent && el.textContent.trim() === "Sepete Ekle") {
         var p = currentProduct(); if (p) { e.preventDefault(); p.qty = readQty(); add(p); }
@@ -116,6 +129,15 @@
   }, true);
 
   fetch("./products.json").then(function (r) { return r.json(); }).then(function (d) { PRODUCTS = d; }).catch(function () {});
+  // Hesabim/login butonu: hesap sistemi yok -> WhatsApp destek
+  function wireAccount(){
+    document.querySelectorAll('[title="Hesabım"]').forEach(function(el){
+      if(el.__wa)return; el.__wa=1; el.style.cursor="pointer";
+      el.addEventListener("click",function(e){e.preventDefault();window.open("https://wa.me/"+WA+"?text="+encodeURIComponent("Merhaba, hesap/siparişlerim hakkında bilgi almak istiyorum."),"_blank");});
+    });
+  }
+  var _paint0=paint; paint=function(){_paint0();wireAccount();};
+
   var iv = setInterval(paint, 600); setTimeout(function () { clearInterval(iv); setInterval(paint, 1500); }, 6000);
   if (document.readyState !== "loading") paint(); else document.addEventListener("DOMContentLoaded", paint);
 })();
