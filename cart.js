@@ -129,14 +129,6 @@
   }, true);
 
   fetch("./products.json").then(function (r) { return r.json(); }).then(function (d) { PRODUCTS = d; }).catch(function () {});
-  // Hesabim/login butonu: hesap sistemi yok -> WhatsApp destek
-  function wireAccount(){
-    document.querySelectorAll('[title="Hesabım"]').forEach(function(el){
-      if(el.__wa)return; el.__wa=1; el.style.cursor="pointer";
-      el.addEventListener("click",function(e){e.preventDefault();window.open("https://wa.me/"+WA+"?text="+encodeURIComponent("Merhaba, hesap/siparişlerim hakkında bilgi almak istiyorum."),"_blank");});
-    });
-  }
-  var _paint0=paint; paint=function(){_paint0();wireAccount();};
 
   var iv = setInterval(paint, 600); setTimeout(function () { clearInterval(iv); setInterval(paint, 1500); }, 6000);
   if (document.readyState !== "loading") paint(); else document.addEventListener("DOMContentLoaded", paint);
