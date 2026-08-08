@@ -14,7 +14,7 @@ PKG="${1:-$HOME/roof-guncelleme.tar.gz}"
 APP=/opt/facette
 TS=$(date +%Y%m%d-%H%M%S)
 BK="/root/roof-yedek-$TS.tar.gz"
-DBN=$(grep -oP 'DB_NAME=\K.*' "$APP/backend/.env" 2>/dev/null | tr -d '"'"'"'' ); DBN=${DBN:-facette}
+DBN=$(grep -oP 'DB_NAME=\K.*' "$APP/backend/.env" 2>/dev/null | tr -d '"' | tr -d "'"); DBN=${DBN:-facette}
 
 echo "> 1/7 YEDEK -> $BK"
 tar czf "$BK" -C "$APP" \
