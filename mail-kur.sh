@@ -312,6 +312,41 @@ fi
 
 systemctl enable postfix dovecot opendkim >/dev/null 2>&1 || true
 
+# ------------------------------------------- 8.5) estoril-mail yonetim komutu
+echo "> 8.5 estoril-mail komutu (istedigin adresi sen ac)"
+cat > /usr/local/bin/estoril-mail <<'EMAIL'
+#!/usr/bin/env bash
+set -euo pipefail
+DOMAIN="estoril.com.tr"; USERS="/etc/dovecot/users"; VBOX="/etc/postfix/vmailbox"
+[ "$(id -u)" -eq 0 ] || { echo "root gerek: sudo estoril-mail ..."; exit 1; }
+norm(){ case "$1" in *@*) printf '%s' "$1";; *) printf '%s@%s' "$1" "$DOMAIN";; esac; }
+cmd="${1:-}"; a="${2:-}"; p="${3:-}"
+case "$cmd" in
+  add)
+    [ -n "$a" ] && [ -n "$p" ] || { echo "kullanim: sudo estoril-mail add ad 'Sifre'"; exit 1; }
+    addr="$(norm "$a")"; lp="${addr%@*}"
+    grep -q "^${addr}:" "$USERS" 2>/dev/null && { echo "zaten var: $addr"; exit 1; }
+    h="$(doveadm pw -s SHA512-CRYPT -p "$p")"
+    printf '%s:%s\n' "$addr" "$h" >> "$USERS"
+    printf '%s\t%s/%s/\n' "$addr" "$DOMAIN" "$lp" >> "$VBOX"; postmap "$VBOX"
+    mkdir -p "/var/mail/vhosts/${DOMAIN}/${lp}"; chown -R vmail:vmail "/var/mail/vhosts/${DOMAIN}"
+    systemctl reload postfix 2>/dev/null || true
+    echo "EKLENDI: ${addr}" ;;
+  passwd)
+    addr="$(norm "$a")"; grep -q "^${addr}:" "$USERS" 2>/dev/null || { echo "yok: $addr"; exit 1; }
+    h="$(doveadm pw -s SHA512-CRYPT -p "$p")"
+    ea="$(printf '%s' "$addr" | sed 's/[.[\*^$/]/\\&/g')"; eh="$(printf '%s' "$h" | sed 's/[&/\]/\\&/g')"
+    sed -i "s/^${ea}:.*/${ea}:${eh}/" "$USERS"; echo "SIFRE DEGISTI: ${addr}" ;;
+  del)
+    addr="$(norm "$a")"; es="$(printf '%s' "$addr" | sed 's/[.[\*^$/]/\\&/g')"
+    sed -i "/^${es}:/d" "$USERS"; sed -i "/^${es}$(printf '\t')/d" "$VBOX"; postmap "$VBOX"
+    systemctl reload postfix 2>/dev/null || true; echo "SILINDI: ${addr}" ;;
+  list) echo "Posta kutulari:"; cut -d: -f1 "$USERS" 2>/dev/null | sed 's/^/  /' ;;
+  *) echo "sudo estoril-mail add|passwd|del|list  (or: add satis 'Sifre')" ;;
+esac
+EMAIL
+chmod +x /usr/local/bin/estoril-mail
+
 # ------------------------------------------------------------- 9) OZET
 echo "> 9/9 DKIM kaydi + ozet"
 DKVAL="$(python3 - <<'PY'

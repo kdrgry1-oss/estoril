@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# ============================================================================
+# estoril-mail — Estoril posta kutusu yonetimi (istedigin adresi sen ac)
+#   sudo estoril-mail add    ad[@estoril.com.tr] 'Sifre'   -> yeni kutu ac
+#   sudo estoril-mail passwd ad[@estoril.com.tr] 'Yeni'    -> sifre degistir
+#   sudo estoril-mail del    ad[@estoril.com.tr]           -> kutu sil
+#   sudo estoril-mail list                                 -> kutulari listele
+# ============================================================================
+set -euo pipefail
+DOMAIN="estoril.com.tr"
+USERS="/etc/dovecot/users"
+VBOX="/etc/postfix/vmailbox"
+[ "$(id -u)" -eq 0 ] || { echo "root gerek: sudo estoril-mail ..."; exit 1; }
+
+norm(){ case "$1" in *@*) printf '%s' "$1";; *) printf '%s@%s' "$1" "$DOMAIN";; esac; }
+
+cmd="${1:-}"; a="${2:-}"; p="${3:-}"
+case "$cmd" in
+  add)
+    [ -n "$a" ] && [ -n "$p" ] || { echo "kullanim: sudo estoril-mail add ad 'Sifre'"; exit 1; }
+    addr="$(norm "$a")"; lp="${addr%@*}"
+    grep -q "^${addr}:" "$USERS" 2>/dev/null && { echo "zaten var: $addr"; exit 1; }
+    h="$(doveadm pw -s SHA512-CRYPT -p "$p")"
+    printf '%s:%s\n' "$addr" "$h" >> "$USERS"
+    printf '%s\t%s/%s/\n' "$addr" "$DOMAIN" "$lp" >> "$VBOX"
+    postmap "$VBOX"
+    mkdir -p "/var/mail/vhosts/${DOMAIN}/${lp}"
+    chown -R vmail:vmail "/var/mail/vhosts/${DOMAIN}"
+    systemctl reload postfix 2>/dev/null || true
+    echo "EKLENDI: ${addr}  (Roundcube girisi: ${addr} / verdigin sifre)"
+    ;;
+  passwd)
+    [ -n "$a" ] && [ -n "$p" ] || { echo "kullanim: sudo estoril-mail passwd ad 'Yeni'"; exit 1; }
+    addr="$(norm "$a")"
+    grep -q "^${addr}:" "$USERS" 2>/dev/null || { echo "yok: $addr"; exit 1; }
+    h="$(doveadm pw -s SHA512-CRYPT -p "$p")"
+    esc_addr="$(printf '%s' "$addr" | sed 's/[.[\*^$/]/\\&/g')"
+    esc_h="$(printf '%s' "$h" | sed 's/[&/\]/\\&/g')"
+    sed -i "s/^${esc_addr}:.*/${esc_addr}:${esc_h}/" "$USERS"
+    echo "SIFRE DEGISTI: ${addr}"
+    ;;
+  del)
+    [ -n "$a" ] || { echo "kullanim: sudo estoril-mail del ad"; exit 1; }
+    addr="$(norm "$a")"
+    esc="$(printf '%s' "$addr" | sed 's/[.[\*^$/]/\\&/g')"
+    sed -i "/^${esc}:/d" "$USERS"
+    sed -i "/^${esc}$(printf '\t')/d" "$VBOX"
+    postmap "$VBOX"
+    systemctl reload postfix 2>/dev/null || true
+    echo "SILINDI: ${addr}  (posta klasoru /var/mail/vhosts/${DOMAIN}/${addr%@*} elle silinebilir)"
+    ;;
+  list)
+    echo "Posta kutulari:"
+    cut -d: -f1 "$USERS" 2>/dev/null | sed 's/^/  /' || echo "  (hic yok)"
+    ;;
+  *)
+    echo "estoril-mail — posta kutusu yonetimi"
+    echo "  sudo estoril-mail add    satis 'Sifre123'   yeni kutu ac"
+    echo "  sudo estoril-mail passwd satis 'YeniSifre'   sifre degistir"
+    echo "  sudo estoril-mail del    satis               kutu sil"
+    echo "  sudo estoril-mail list                       kutulari goster"
+    ;;
+esac
