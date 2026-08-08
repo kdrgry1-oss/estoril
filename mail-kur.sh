@@ -22,7 +22,7 @@ trap 'echo "!! HATA: satir $LINENO — durdu. Yukaridaki son adima bak."' ERR
 DOMAIN="estoril.com.tr"
 HOST="mail.estoril.com.tr"
 MAILUSER="info@${DOMAIN}"
-MAILPASS="${MAIL_PASS:-$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 16)}"
+MAILPASS="${MAIL_PASS:-$(openssl rand -hex 8)}"
 RCVER="1.6.9"
 CFMAIL="/etc/letsencrypt/live/${HOST}"
 CFBASE="/etc/letsencrypt/live/${DOMAIN}"
@@ -246,7 +246,7 @@ if [ ! -f /var/www/roundcube/index.php ]; then
   rm -f rc.tgz
 fi
 mkdir -p /var/www/roundcube/db
-DESKEY="$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 24)"
+DESKEY="$(openssl rand -hex 16)"
 cat > /var/www/roundcube/config/config.inc.php <<RC
 <?php
 \$config = [];
