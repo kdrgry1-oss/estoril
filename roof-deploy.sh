@@ -55,13 +55,18 @@ echo "   build OK"
 
 echo "> 6/7 Backend restart + saglik kontrolu"
 systemctl restart facette-backend
-sleep 4
-CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 12 http://127.0.0.1:8001/api/estoril/storefront-products 2>/dev/null || echo 000)
-if [ "$CODE" = "000" ]; then
-  echo "!! Backend ayaga kalkmadi. Son loglar:"; journalctl -u facette-backend -n 25 --no-pager
+echo "   backend aciliyor (30sn'ye kadar bekleniyor)..."
+CODE=000
+for i in $(seq 1 15); do
+  sleep 2
+  CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 http://127.0.0.1:8001/api/estoril/storefront-products 2>/dev/null || true)
+  [ "$CODE" = "200" ] && break
+done
+if [ "$CODE" != "200" ]; then
+  echo "!! Backend saglikli degil (son HTTP: $CODE). Loglar:"; journalctl -u facette-backend -n 25 --no-pager
   restore; exit 1
 fi
-echo "   backend saglikli (HTTP $CODE)"
+echo "   backend saglikli (HTTP 200)"
 
 echo "> 7/7 Marka site_name=Roof + nginx reload"
 mongosh "$DBN" --quiet --eval 'db.settings.updateOne({id:"main"},{$set:{site_name:"Roof"}},{upsert:true})' >/dev/null 2>&1 || true
