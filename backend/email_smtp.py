@@ -5,7 +5,7 @@ Fonksiyon adlari korunmustur; cagiran tum moduller degismeden calisir.
 
 settings.id="email_smtp" alanlari (ayar sayfasiyla uyumlu):
   enabled   : bool  -> gonderim aktif mi
-  username  : str   -> GONDEREN e-posta adresi (or. info@facette.com.tr)
+  username  : str   -> GONDEREN e-posta adresi (or. info@estoril.com.tr)
   password  : str   -> ZeptoMail "Send Mail Token" (API anahtari)
   from_name : str   -> gonderen adi (or. ESTORIL)
   host      : str   -> 'eu' iceriyorsa api.zeptomail.eu, aksi halde api.zeptomail.com

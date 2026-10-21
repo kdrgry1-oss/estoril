@@ -16,7 +16,7 @@ import re as _re
 # Üretici / İthalatçı (GPSR / "Ürün Denetim Bilgileri") tek kaynak.
 ESTORIL_COMPANY = {
     "company_name": "ESTORIL DIŞ TİCARET A.Ş.",
-    "email": "info@facette.com.tr",
+    "email": "info@estoril.com.tr",
     "address": "İkitelli O.S.B. İmsan San. Sit. D BLOK NO:3",
 }
 

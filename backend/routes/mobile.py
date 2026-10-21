@@ -182,7 +182,7 @@ async def app_config():
         "support": cfg.get("support") or {
             "whatsapp": "",
             "phone": "",
-            "email": "destek@facette.com.tr",
+            "email": "destek@estoril.com.tr",
         },
         "deep_link_scheme": "facette",  # facette://order/123
         "min_supported_versions": {"ios": "1.0.0", "android": "1.0.0"},

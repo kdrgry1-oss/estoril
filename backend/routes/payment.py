@@ -172,7 +172,7 @@ def _build_initialize_payload(order: dict, callback_url: str) -> dict:
     last = (ship.get("last_name") or "").strip() or "Estoril"
     contact = f"{first} {last}".strip()
     _raw_email = (ship.get("email") or order.get("email") or "").strip()
-    email = _raw_email if re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", _raw_email) else "siparis@facette.com.tr"
+    email = _raw_email if re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", _raw_email) else "siparis@estoril.com.tr"
     address = (ship.get("address") or "Adres").strip()
     city = (ship.get("city") or "İstanbul").strip()
     zipcode = str(ship.get("postal_code") or ship.get("zip_code") or "34000")

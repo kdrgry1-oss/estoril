@@ -14,7 +14,7 @@ router = APIRouter()
 
 WEBHOOK_SECRET = os.environ.get("MAIL_WEBHOOK_SECRET", "")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
-MAIL_FROM = os.environ.get("MAIL_FROM", "Estoril <info@facette.com.tr>")
+MAIL_FROM = os.environ.get("MAIL_FROM", "Estoril <info@estoril.com.tr>")
 
 
 # --- GELEN MAIL (Cloudflare Worker buraya POST eder) ---

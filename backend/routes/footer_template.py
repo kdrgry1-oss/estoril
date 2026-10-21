@@ -60,7 +60,7 @@ _DEFAULT = {
         {
             "title": "İletişim",
             "static": [
-                "info@facette.com.tr",
+                "info@estoril.com.tr",
                 "+90 543 330 03 10",
                 "Pazartesi-Cumartesi 09:00 - 18:00",
             ],

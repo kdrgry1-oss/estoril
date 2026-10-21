@@ -170,7 +170,7 @@ def make_pdf(row):
             return Image(out,width=im.width*scale,height=im.height*scale)
         except Exception:return P('Görsel yok')
     logo=photo('/var/www/estoril/uploads/estoril-metallic-transparent.png',155,52)
-    company=[P('ESTORIL COSMETIC'),P('Halkalı Merkez Mah. Filiz Sok. No:34'),P('Küçükçekmece / İstanbul'),P('0533 433 12 51'),P('info@estorilcosmetic.com · estoril.com.tr')]
+    company=[P('ESTORIL COSMETIC'),P('Halkalı Merkez Mah. Filiz Sok. No:34'),P('Küçükçekmece / İstanbul'),P('0533 433 12 51'),P('info@estoril.com.tr · estoril.com.tr')]
     header=Table([[logo,company]],colWidths=[215,300]);header.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0)]))
     subtitle=ParagraphStyle('subtitle',parent=normal,fontName='EstorilBold',fontSize=12,leading=16,textColor=colors.HexColor('#2563c9'))
     def pctfmt(v):return str(Decimal(str(v or 0)).normalize()).replace('.',',')
