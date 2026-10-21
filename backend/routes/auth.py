@@ -644,7 +644,7 @@ async def forgot_password_email(request: Request, req: EmailResetReq):
         title="Şifrenizi sıfırlayın",
         intro_html=(
             "Merhaba " + (name or "değerli müşterimiz") + ",<br>"
-            "Facette hesabınız için bir şifre sıfırlama talebi aldık. "
+            "Estoril hesabınız için bir şifre sıfırlama talebi aldık. "
             "Yeni bir şifre belirlemek için aşağıdaki butona tıklamanız yeterli."
         ),
         cta_text="ŞİFREYİ SIFIRLA", cta_url=link,
@@ -655,7 +655,7 @@ async def forgot_password_email(request: Request, req: EmailResetReq):
     )
     try:
         from email_smtp import send_smtp_email
-        res = await send_smtp_email(db, user["email"], "Şifre Sıfırlama — FACETTE", html)
+        res = await send_smtp_email(db, user["email"], "Şifre Sıfırlama — ESTORIL", html)
         if not res.get("success"):
             logger.warning(f"reset email send failed for {email}: {res.get('response')}")
     except Exception as e:

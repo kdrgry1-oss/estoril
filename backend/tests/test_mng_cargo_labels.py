@@ -125,7 +125,7 @@ class TestCargoLabelEndpoint:
         
         # Check for sender section
         assert "Gönderici Bilgileri" in html_content, "Should have 'Gönderici Bilgileri' section"
-        assert "FACETTE" in html_content, "Should contain FACETTE company name"
+        assert "ESTORIL" in html_content, "Should contain ESTORIL company name"
         print("PASS: Cargo label has sender information")
     
     def test_cargo_label_has_receiver_info(self, auth_headers):

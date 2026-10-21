@@ -40,7 +40,7 @@ def render_size_table_image(
     sizes: list,          # e.g. ["S", "M", "L", "XL"]
     columns: list,        # e.g. ["Göğüs", "Bel", "Kalça", "Omuz"]
     values: dict,         # {"S": {"Göğüs": "96", "Bel": "80", ...}, ...}
-    brand: str = "FACETTE",
+    brand: str = "ESTORIL",
     unit: str = "cm",
 ) -> bytes:
     """Render a 1200x1800 JPEG size-table with a mannequin silhouette (suudcollection-tarzı)."""

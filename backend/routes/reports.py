@@ -186,7 +186,7 @@ async def category_report(
 ):
     s, e = _iso_range(start_date, end_date, days_default=90)
     # items -> product: product_id VEYA barkod (üst/varyant) ile eşleştir (pazaryeri kalemleri
-    # productCode taşır, Facette id'siyle eşleşmez → barkod köprüsü şart). Kategori adı: kategori
+    # productCode taşır, Estoril id'siyle eşleşmez → barkod köprüsü şart). Kategori adı: kategori
     # dokümanı > ürünün category_name'i > kalemin kendi category'si > (Kategorisiz).
     pipeline = [
         {"$match": _base_match(s, e, source)},

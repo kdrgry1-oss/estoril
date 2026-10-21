@@ -149,17 +149,17 @@ async def delete_vendor(vendor_id: str, current_user: dict = Depends(require_adm
 
 @router.post("/seed-default")
 async def seed_default_vendor(current_user: dict = Depends(require_admin)):
-    """Seed default FACETTE manufacturer"""
+    """Seed default ESTORIL manufacturer"""
     
-    existing = await db.vendors.find_one({"name": "FACETTE", "vendor_type": "manufacturer"})
+    existing = await db.vendors.find_one({"name": "ESTORIL", "vendor_type": "manufacturer"})
     if existing:
-        return {"message": "FACETTE üretici zaten mevcut", "id": existing["id"]}
+        return {"message": "ESTORIL üretici zaten mevcut", "id": existing["id"]}
     
     vendor = {
         "id": await generate_short_id("vendors"),
-        "name": "FACETTE",
+        "name": "ESTORIL",
         "vendor_type": "manufacturer",
-        "company_name": "FACETTE Tekstil Ltd. Şti.",
+        "company_name": "ESTORIL Tekstil Ltd. Şti.",
         "tax_office": "",
         "tax_number": "",
         "identity_number": "",
@@ -183,4 +183,4 @@ async def seed_default_vendor(current_user: dict = Depends(require_admin)):
     
     await db.vendors.insert_one(vendor)
     
-    return {"id": vendor["id"], "message": "FACETTE üretici oluşturuldu"}
+    return {"id": vendor["id"], "message": "ESTORIL üretici oluşturuldu"}

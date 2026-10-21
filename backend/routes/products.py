@@ -198,7 +198,7 @@ def _build_merchant_xml(prods, site, shop, target="google", in_stock_only=False,
 async def _feed_site_shop_prods():
     main = await db.settings.find_one({"id": "main"}, {"_id": 0}) or {}
     site = (main.get("site_url") or "https://facette.com.tr").rstrip("/")
-    shop = main.get("site_name") or "FACETTE"
+    shop = main.get("site_name") or "ESTORIL"
     prods = await db.products.find({"is_active": True, "is_deleted": {"$ne": True}}, {"_id": 0}).to_list(50000)
     return site, shop, prods
 
@@ -416,7 +416,7 @@ async def ai_generate_description(payload: dict, current_user: dict = Depends(re
     )
 
     sys = (
-        "Sen FACETTE (Türk kadın giyim) için ürün açıklaması üreten bir asistansın. "
+        "Sen ESTORIL (Türk kadın giyim) için ürün açıklaması üreten bir asistansın. "
         "Sana SABİT bir HTML ŞABLONU verilecek. Çıktın bu şablonun HTML yapısını, etiketlerini, "
         "inline style'larını (font-size:11px), &nbsp; girintilerini, <br /> satır sonlarını ve ÜÇ "
         "bölümünü (1) kısa özellikler paragrafı, (2) 'Kumaş &amp; İçerik Bilgisi', (3) 'Yıkama ve "
@@ -1495,7 +1495,7 @@ async def create_product(
         "category_id": _primary_cat,
         "category_ids": _cat_ids_all,
         "categories": _sel_cats,
-        "brand": product_data.get("brand", "FACETTE"),
+        "brand": product_data.get("brand", "ESTORIL"),
         "images": product_data.get("images", []),
         "variants": product_data.get("variants", []),
         "attributes": product_data.get("attributes", []),
@@ -1504,7 +1504,7 @@ async def create_product(
         "barcode": product_data.get("barcode", ""),
         "sku": product_data.get("sku", ""),
         "supplier": product_data.get("supplier", ""),
-        "manufacturer": product_data.get("manufacturer", "FACETTE"),
+        "manufacturer": product_data.get("manufacturer", "ESTORIL"),
         # FAZ 7 — İmalat modülü için ek alanlar
         "collection": product_data.get("collection", ""),   # ör. "2026 İlkbahar/Yaz"
         "purchase_price": float(product_data.get("purchase_price", 0) or 0),  # Alış fiyatı

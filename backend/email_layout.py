@@ -1,11 +1,11 @@
 """
-email_layout.py — FACETTE markalı tek tip e-posta kabuğu (shell)
+email_layout.py — ESTORIL markalı tek tip e-posta kabuğu (shell)
 =============================================================================
 Sitedeki TÜM transactional e-postalar (sipariş bildirimleri, şifre sıfırlama,
 iade vs.) bu kabuğu kullanır:
 
     ┌──────────────────────────┐
-    │        FACETTE           │  ← üstte logo
+    │        ESTORIL           │  ← üstte logo
     │        ┌────┐            │
     │        │ ◻ │            │  ← ikon kutusu
     │        └────┘            │
@@ -15,7 +15,7 @@ iade vs.) bu kabuğu kullanır:
     │      [  CTA BUTON  ]     │
     │      bilgi kutusu        │
     │  INSTAGRAM · TIKTOK      │  ← altta sosyal + telif
-    │  © FACETTE               │
+    │  © ESTORIL               │
     └──────────────────────────┘
 
 ÖNEMLİ — PLACEHOLDER GÜVENLİĞİ:
@@ -86,10 +86,10 @@ def email_shell(*, eyebrow="", title="", intro_html="", icon="",
         'style="width:600px;max-width:600px;background:' + _CARD + ';">'
     )
 
-    # Header — gerçek logo görseli (resim engellenirse alt="FACETTE" görünür)
+    # Header — gerçek logo görseli (resim engellenirse alt="ESTORIL" görünür)
     P.append(
         '<tr><td style="padding:32px 24px 28px;text-align:center;">'
-        '<img src="' + LOGO_URL + '" alt="FACETTE" width="150" '
+        '<img src="' + LOGO_URL + '" alt="ESTORIL" width="150" '
         'style="display:inline-block;width:150px;max-width:62%;height:auto;'
         'border:0;outline:none;text-decoration:none;" />'
         '</td></tr>'
@@ -158,7 +158,7 @@ def email_shell(*, eyebrow="", title="", intro_html="", icon="",
         '<a href="' + TIKTOK_URL + '" style="font-size:11px;letter-spacing:2px;color:' + _MUTED + ';'
         'text-decoration:none;">TIKTOK</a>'
         '<div style="font-size:11px;color:' + _FAINT + ';margin:16px 0 4px;letter-spacing:0.3px;">'
-        '© ' + yr + ' FACETTE · Tüm hakları saklıdır</div>'
+        '© ' + yr + ' ESTORIL · Tüm hakları saklıdır</div>'
         '<div style="font-size:11px;color:' + _FAINT + ';letter-spacing:0.3px;">'
         'Bu e-posta ' + site + ' hesabınızla ilişkili adrese gönderildi.</div>'
         '</td></tr></table>'
@@ -189,6 +189,6 @@ def render_email(subject: str = "", inner_html: str = "") -> str:
     low = html.lower()
     if ("<!--fct-shell-->" in low) or (LOGO_URL.lower() in low):
         return html  # zaten markalı
-    # Konudan temiz bir başlık türet ("... — 913BS" / "... — FACETTE" kuyruğunu at)
+    # Konudan temiz bir başlık türet ("... — 913BS" / "... — ESTORIL" kuyruğunu at)
     title = (subject or "").split(" — ")[0].strip()
     return email_shell(title=title, intro_html=html, preheader=(subject or "").strip())

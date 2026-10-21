@@ -1,5 +1,5 @@
 """
-E-Commerce API Tests for Facette Fashion Platform
+E-Commerce API Tests for Estoril Fashion Platform
 Tests: Auth, Products, Categories, Orders, Admin Dashboard
 """
 import pytest

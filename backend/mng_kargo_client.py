@@ -10,7 +10,7 @@ Verified WSDL operations:
   - MNGGonderiBarkod(req)              : barcode print request
 
 Default credentials (override via DB settings):
-  CustomerCode: FACETTE DIŞ TİC.A.Ş.
+  CustomerCode: ESTORIL DIŞ TİC.A.Ş.
   Username    : 490059279
   Password    : Face.0024E
   TaxNumber   : 6080712084
@@ -352,7 +352,7 @@ def create_shipment(
     vergi_no: str = "",
     kapida_odeme: int = 0,
     mal_bedeli_odeme: str = "",
-    platform_adi: str = "FACETTE",
+    platform_adi: str = "ESTORIL",
     platform_kodu: str = "",
 ) -> Dict:
     """

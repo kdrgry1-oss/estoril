@@ -366,7 +366,7 @@ def _hb_created_at(o):
         return d
     return datetime.now(timezone.utc).isoformat()
 async def _hb_enrich_items(order_data):
-    """HB kalemlerini FACETTE ürünleriyle eşler: görsel + FACETTE product_id + barkod (stok düşümü için) + ad/varyant.
+    """HB kalemlerini ESTORIL ürünleriyle eşler: görsel + ESTORIL product_id + barkod (stok düşümü için) + ad/varyant.
     Eşleşmeyen kalem dokunulmadan kalır (matched=False işaretlenir)."""
     for it in (order_data.get("items") or []):
         codes = [it.get("barcode"), it.get("sku"), it.get("product_id"),
@@ -528,7 +528,7 @@ async def hepsiburada_import_by_number(on: str = "", key: str = ""):
                 try:
                     await _decrement_stock_for_imported_order(order_data, "hepsiburada")
                 except Exception:
-                    pass  # ürün FACETTE'de yoksa stok düşmez — sipariş yine kaydedildi
+                    pass  # ürün ESTORIL'de yoksa stok düşmez — sipariş yine kaydedildi
             matched = sum(1 for it in order_data.get("items", []) if it.get("matched"))
             out.append({"order_number": onum, "items": len(order_data.get("items", [])), "eslesen": matched})
         return {"ok": True, "imported": imported, "updated": updated, "orders": out,
@@ -1408,7 +1408,7 @@ async def _build_hb_product_item(product: dict, merchant_id: str):
             else:
                 # KATMAN 2 — BİREBİR eşleşen açık kaynak (ad-kazıma / fuzzy tahmin YOK):
                 #   kart(HB) → TRENDYOL aynı-adlı özellik → kategori sabiti → ortak default →
-                #   FACETTE sabit varsayılan (Menşei/Cinsiyet/Yaş Grubu/…, Üretici/İthalatçı) → alan-eşleştirme
+                #   ESTORIL sabit varsayılan (Menşei/Cinsiyet/Yaş Grubu/…, Üretici/İthalatçı) → alan-eşleştirme
                 raw = (v_hb.get(aname) or hb_attrs_for_product.get(aname)
                        or local.get(anorm)
                        or defaults.get(aname) or defaults.get(aid) or defaults_norm.get(anorm)

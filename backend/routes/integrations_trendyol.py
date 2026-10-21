@@ -114,7 +114,7 @@ async def get_trendyol_headers():
     encoded = base64.b64encode(credentials.encode()).decode()
     return {
         "Authorization": f"Basic {encoded}",
-        "User-Agent": f'{config["supplier_id"]} - FacetteIntegration',
+        "User-Agent": f'{config["supplier_id"]} - EstorilIntegration',
         "Content-Type": "application/json"
     }
 def calculate_trendyol_price(base_price: float, product_data: dict, trendyol_config: dict) -> float:
@@ -1314,10 +1314,10 @@ async def sync_products_to_trendyol(
             else:
                 _push(m_ty_id, custom=lval)
 
-        # 🎯 FACETTE SABİT VARSAYILANLAR (gap-fill, EN SON):
+        # 🎯 ESTORIL SABİT VARSAYILANLAR (gap-fill, EN SON):
         # Menşei=Türkiye · Cinsiyet=Kadın · Yaş Grubu=Yetişkin · Ortam/Koleksiyon=Casual/Günlük ·
         # Ek Özellik=Mevcut Değil · Kutu Durumu=Kutu Yok · Persona=Fashion Forward ·
-        # Performans=Cool & Comfort · Üretici/İthalatçı (GPSR)=FACETTE bilgileri.
+        # Performans=Cool & Comfort · Üretici/İthalatçı (GPSR)=ESTORIL bilgileri.
         # Yalnız ürünün DOLDURMADIĞI (processed olmayan) Trendyol özelliğine yazılır; listeli
         # alanlar ADIYLA value_id'ye çözülür (Türkiye→TR), serbest alanlar custom gider.
         for m_ty_id, m_meta in meta.items():

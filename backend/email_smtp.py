@@ -7,7 +7,7 @@ settings.id="email_smtp" alanlari (ayar sayfasiyla uyumlu):
   enabled   : bool  -> gonderim aktif mi
   username  : str   -> GONDEREN e-posta adresi (or. info@facette.com.tr)
   password  : str   -> ZeptoMail "Send Mail Token" (API anahtari)
-  from_name : str   -> gonderen adi (or. FACETTE)
+  from_name : str   -> gonderen adi (or. ESTORIL)
   host      : str   -> 'eu' iceriyorsa api.zeptomail.eu, aksi halde api.zeptomail.com
 """
 import httpx
@@ -37,7 +37,7 @@ def _auth_header(token: str) -> str:
 async def send_smtp_email(db, to: str, subject: str, html: str,
                           from_name=None, reply_to=None, text=None, wrap=True) -> dict:
     """Tek aliciya ZeptoMail API ile mail. Doner: {success, response}.
-    wrap=True (varsayilan): HTML markali FACETTE kabuguna (logo + sosyal footer) sarilir.
+    wrap=True (varsayilan): HTML markali ESTORIL kabuguna (logo + sosyal footer) sarilir.
     Zaten markaliysa tekrar sarilmaz (idempotent). Boylece sistemden cikan TUM mailler
     -- uyelik, sifre, s3 durum bildirimi, toplu, test -- istisnasiz ayni tasarimda gider.
     Markasiz gitmesi gereken ozel durumlar icin wrap=False gecilebilir."""
@@ -53,7 +53,7 @@ async def send_smtp_email(db, to: str, subject: str, html: str,
             pass  # sarma basarisiz olursa ham HTML ile devam (mail asla bloklanmaz)
 
     sender = cfg.get("username")
-    name = from_name or cfg.get("from_name") or "FACETTE"
+    name = from_name or cfg.get("from_name") or "ESTORIL"
     payload = {
         "from": {"address": sender, "name": name},
         "to": [{"email_address": {"address": to}}],

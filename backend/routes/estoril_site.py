@@ -1,7 +1,7 @@
 """
 Estoril site içerik yönetimi — JSON dosya tabanlı.
 
-Vitrin (statik Estoril sitesi) ile Facette panelini bağlar:
+Vitrin (statik Estoril sitesi) ile Estoril panelini bağlar:
 - Site içeriği (site-content.json) ve ürünler (products.json), vitrinin servis
   edildiği klasördeki JSON dosyalarında tutulur. Vitrin sayfaları bu dosyaları
   fetch ile okur; panelden kaydedince site anında güncellenir.

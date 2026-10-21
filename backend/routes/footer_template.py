@@ -67,7 +67,7 @@ _DEFAULT = {
         },
     ],
     "newsletter": {
-        "title": "Facette Kulübü seni bekliyor",
+        "title": "Estoril Kulübü seni bekliyor",
         "description": "Yeni koleksiyonlar, özel kampanyalar ve sana özel fırsatlardan ilk sen haberdar ol.",
         "placeholder": "E-posta adresin",
     },
@@ -76,7 +76,7 @@ _DEFAULT = {
         "facebook": "",
         "twitter": "",
     },
-    "copyright": "© 2026 Facette. Tüm hakları saklıdır.",
+    "copyright": "© 2026 Estoril. Tüm hakları saklıdır.",
 }
 
 

@@ -244,7 +244,7 @@ async def google_merchant_feed():
         name = p.get("name", "")
         desc = p.get("description") or name
         img = (p.get("images") or [None])[0] or ""
-        brand = p.get("brand") or "FACETTE"
+        brand = p.get("brand") or "ESTORIL"
         cat = p.get("category_name") or "Giyim"
         price = p.get("sale_price") or p.get("price") or 0
         variants = p.get("variants") or []
@@ -273,9 +273,9 @@ async def google_merchant_feed():
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
 <channel>
-  <title>FACETTE</title>
+  <title>ESTORIL</title>
   <link>{site_url}</link>
-  <description>FACETTE Google Merchant Product Feed</description>
+  <description>ESTORIL Google Merchant Product Feed</description>
   {''.join(items_xml)}
 </channel>
 </rss>"""

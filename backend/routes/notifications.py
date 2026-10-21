@@ -57,7 +57,7 @@ class TestReq(BaseModel):
     channel: str
     provider_key: Optional[str] = None
     to: str
-    message: str = "Facette test bildirimi ✓"
+    message: str = "Estoril test bildirimi ✓"
 
 
 class TestTemplateReq(BaseModel):
@@ -163,31 +163,31 @@ async def upsert_template(req: TemplateReq, current_user: dict = Depends(require
 _DEFAULT_TEMPLATES = {
     # (event, channel) → payload
     ("order_confirmed", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisiniz onaylandi. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisiniz onaylandi. Estoril",
     ("order_shipped", "sms"):
-        "Siparisiniz kargoya verildi. Kargo takip: {tracking_number}. Facette",
+        "Siparisiniz kargoya verildi. Kargo takip: {tracking_number}. Estoril",
     ("order_delivered", "sms"):
-        "Siparisiniz teslim edildi. Facette'i tercih ettiginiz icin tesekkurler.",
+        "Siparisiniz teslim edildi. Estoril'i tercih ettiginiz icin tesekkurler.",
     ("order_undelivered", "sms"):
-        "Kargonuz teslim edilemedi, subede bekliyor. Takip: {tracking_number}. Facette",
+        "Kargonuz teslim edilemedi, subede bekliyor. Takip: {tracking_number}. Estoril",
     ("order_cancelled", "sms"):
         "{order_number} numarali siparisiniz iptal edildi. Bilgi: destek@facette.com",
     ("order_awaiting_payment", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisiniz alindi. Havale/EFT odemenizi bekliyoruz; detaylar e-postanizda. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisiniz alindi. Havale/EFT odemenizi bekliyoruz; detaylar e-postanizda. Estoril",
     ("order_payment_notified", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin odeme bildiriminiz alindi, kontrol ediliyor. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin odeme bildiriminiz alindi, kontrol ediliyor. Estoril",
     ("order_return_requested", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin iade talebiniz olusturuldu. Iade kodu: {return_code}. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin iade talebiniz olusturuldu. Iade kodu: {return_code}. Estoril",
     ("order_return_approved", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisinize ait iadeniz onaylandi. Iade bedeli: {refund_amount} TL. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisinize ait iadeniz onaylandi. Iade bedeli: {refund_amount} TL. Estoril",
     ("order_return_rejected", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali iade talebiniz degerlendirildi. Detaylar e-postanizda. Facette",
+        "Merhaba {customer_name}, {order_number} numarali iade talebiniz degerlendirildi. Detaylar e-postanizda. Estoril",
     ("order_refunded", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin iade bedeli {refund_amount} TL hesabiniza iade edildi. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin iade bedeli {refund_amount} TL hesabiniza iade edildi. Estoril",
     ("order_partial_refunded", "sms"):
-        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin {refund_amount} TL kismi iade yapildi. Facette",
+        "Merhaba {customer_name}, {order_number} numarali siparisiniz icin {refund_amount} TL kismi iade yapildi. Estoril",
     ("password_reset_otp", "sms"):
-        "Facette dogrulama kodunuz: {otp_code} (5 dk gecerli).",
+        "Estoril dogrulama kodunuz: {otp_code} (5 dk gecerli).",
     ("abandoned_cart", "sms"):
         "Sepetinizde urunler kaldi! Siparis tamamlama baglantisi: {cart_url}",
 }
@@ -195,7 +195,7 @@ _DEFAULT_TEMPLATES = {
 
 # =============================================================================
 # Markalı HTML e-posta şablonları — tümü email_layout.email_shell ile üretilir
-# (üstte FACETTE logosu · ortada bilgiler · altta INSTAGRAM·TIKTOK + telif).
+# (üstte ESTORIL logosu · ortada bilgiler · altta INSTAGRAM·TIKTOK + telif).
 # {customer_name} vb. placeholder'lar korunur; gönderimde render_template doldurur.
 # =============================================================================
 
@@ -365,10 +365,10 @@ _EMAIL_HTML_TEMPLATES = {
         ),
     },
     "welcome": {
-        "subject": "Aramıza hoş geldin · FACETTE",
+        "subject": "Aramıza hoş geldin · ESTORIL",
         "body": email_shell(
             icon="✓", eyebrow="HOŞ GELDİN", title="Aramıza hoş geldin",
-            intro_html="Merhaba {customer_name}, FACETTE ailesine katıldığın için teşekkür ederiz. Yeni sezon parçalarını ve sana özel fırsatları keşfetmeye hemen başlayabilirsin.",
+            intro_html="Merhaba {customer_name}, ESTORIL ailesine katıldığın için teşekkür ederiz. Yeni sezon parçalarını ve sana özel fırsatları keşfetmeye hemen başlayabilirsin.",
             body_html="{coupon_block}",
             cta_text="ALIŞVERİŞE BAŞLA", cta_url="{site_url}",
         ),
@@ -376,9 +376,9 @@ _EMAIL_HTML_TEMPLATES = {
 }
 
 
-# FACETTE Muli marka e-posta şablonları (email_templates.py) — eski ZaraHome tasarımını override eder.
+# ESTORIL Muli marka e-posta şablonları (email_templates.py) — eski ZaraHome tasarımını override eder.
 try:
-    from email_templates import FACETTE_EMAIL_TEMPLATES as _FET
+    from email_templates import ESTORIL_EMAIL_TEMPLATES as _FET
     _EMAIL_HTML_TEMPLATES = _FET
 except Exception:
     pass
@@ -407,7 +407,7 @@ async def seed_templates(
                 subj = ev["name"] if ch == "email" else ""
                 if ch == "email" and not body:
                     body = email_shell(
-                        eyebrow="FACETTE", title=ev["name"],
+                        eyebrow="ESTORIL", title=ev["name"],
                         intro_html="Merhaba {customer_name}, " + ev["name"].lower() + " bildirimini sizinle paylaşıyoruz.",
                     )
 

@@ -141,7 +141,7 @@ async def send_alert(
         return {"alert_id": aid, "throttled": True, "delivered": {"smtp": False, "resend": False}}
 
     target = to_email or ALERT_TO_EMAIL
-    subject = f"[Facette {level.upper()}] {title}"[:200]
+    subject = f"[Estoril {level.upper()}] {title}"[:200]
     text = (
         f"{title}\n\n"
         f"Level: {level}\nKind: {kind}\nTime: {datetime.now(timezone.utc).isoformat()}\n\n"

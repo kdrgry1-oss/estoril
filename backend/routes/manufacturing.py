@@ -99,7 +99,7 @@ async def create_manufacturing(payload: dict, current_user: dict = Depends(requi
         "code": code,
         "product_id": payload.get("product_id", ""),
         "product_name": payload.get("product_name", ""),
-        "partner_name": payload.get("partner_name", "FACETTE İç Stok"),
+        "partner_name": payload.get("partner_name", "ESTORIL İç Stok"),
         "partner_contact": payload.get("partner_contact", ""),
         "responsible_user": payload.get("responsible_user", current_user.get("email", "")),
         "agreement_date": payload.get("agreement_date", now_iso),

@@ -1,5 +1,5 @@
 """
-Test suite for Facette E-Commerce API after modular refactoring
+Test suite for Estoril E-Commerce API after modular refactoring
 Tests: Auth, Products, Categories, CMS, Orders, Admin, Customer, Integrations
 """
 import pytest

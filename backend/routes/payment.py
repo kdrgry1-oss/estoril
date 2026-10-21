@@ -169,7 +169,7 @@ def _build_initialize_payload(order: dict, callback_url: str) -> dict:
     binfo = order.get("billing_info") or {}
 
     first = (ship.get("first_name") or "").strip() or "Müşteri"
-    last = (ship.get("last_name") or "").strip() or "Facette"
+    last = (ship.get("last_name") or "").strip() or "Estoril"
     contact = f"{first} {last}".strip()
     _raw_email = (ship.get("email") or order.get("email") or "").strip()
     email = _raw_email if re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", _raw_email) else "siparis@facette.com.tr"

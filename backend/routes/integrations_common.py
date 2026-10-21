@@ -379,7 +379,7 @@ def _ms_to_iso(v):
         pass
     return str(v)
 async def _decrement_stock_for_imported_order(order_data: dict, source: str):
-    """Facette stok master — yeni içe aktarılan pazaryeri/Ticimax siparişi için
+    """Estoril stok master — yeni içe aktarılan pazaryeri/Ticimax siparişi için
     idempotent stok DÜŞÜMÜ. Aynı sipariş tekrar senkronlanırsa stock_movements
     guard'ı çift düşümü engeller. Kalemde barkod yoksa o kalem atlanır."""
     try:
@@ -414,7 +414,7 @@ def _facette_product_image(prod):
                 return u
     return prod.get("image") or prod.get("main_image") or ""
 async def _facette_match_for_codes(codes):
-    """Kod adaylarıyla (barkod / stok kodu / sku) FACETTE ürün+varyant eşler. -> (product, kod, yontem) | None"""
+    """Kod adaylarıyla (barkod / stok kodu / sku) ESTORIL ürün+varyant eşler. -> (product, kod, yontem) | None"""
     seen, clean = set(), []
     for c in codes:
         c = str(c).strip() if c is not None else ""
@@ -525,7 +525,7 @@ GIB_MODE = os.environ.get('GIB_MODE', 'test')
 GIB_USERNAME = os.environ.get('GIB_USERNAME', '')
 GIB_PASSWORD = os.environ.get('GIB_PASSWORD', '')
 GIB_VKN = os.environ.get('GIB_VKN', '')
-GIB_COMPANY_NAME = os.environ.get('GIB_COMPANY_NAME', 'FACETTE')
+GIB_COMPANY_NAME = os.environ.get('GIB_COMPANY_NAME', 'ESTORIL')
 def is_gib_configured():
     return bool(GIB_USERNAME and GIB_PASSWORD and GIB_VKN and len(GIB_VKN) == 10)
 @router.get("/gib/status")
@@ -1326,7 +1326,7 @@ async def upload_rooftr_products_excel(
             member_price_1 = (_f(first["UYETIPIFIYAT1"]) if _has("UYETIPIFIYAT1") else 0.0) or list_price
             cost_price = _f(first["ALISFIYATI"]) if _has("ALISFIYATI") else 0.0
             vat_rate = _f(first["KDVORANI"], 10) if _has("KDVORANI") else 10
-            vendor = _cell(first, "TEDARIKCI", "FACETTE")
+            vendor = _cell(first, "TEDARIKCI", "ESTORIL")
             description = _cell(first, "ACIKLAMA")
             breadcrumb = _cell(first, "BREADCRUMBKAT")
             category_leaf = _category_from_breadcrumb(breadcrumb)
@@ -1514,7 +1514,7 @@ async def import_xml_products(
             product_type  = _xml_text(item, "g:product_type")
             goog_cat      = _xml_text(item, "g:google_product_category")
             category_name = product_type or goog_cat
-            brand         = _xml_text(item, "g:brand") or "FACETTE"
+            brand         = _xml_text(item, "g:brand") or "ESTORIL"
             product_url   = _xml_text(item, "g:link")
             mpn           = _xml_text(item, "g:mpn")
             label_0       = _xml_text(item, "g:custom_label_0")

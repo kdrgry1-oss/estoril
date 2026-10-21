@@ -299,18 +299,18 @@ async def temu_egress_ip(current_user=Depends(require_admin)):
 
 @router.post("/products")
 async def temu_create_product(req: ProductCreateReq, current_user=Depends(require_admin)):
-    # 🎯 FACETTE SABİT VARSAYILANLAR (gap-fill): ürünün taşımadığı ortak özellikleri
+    # 🎯 ESTORIL SABİT VARSAYILANLAR (gap-fill): ürünün taşımadığı ortak özellikleri
     # (Menşei/Cinsiyet/Yaş Grubu/Ortam/Ek Özellik/Kutu Durumu/Persona/Performans +
     # Üretici/İthalatçı GPSR) Temu attribute'larına ekle. Mevcut değer DOKUNULMAZ.
-    from facette_defaults import FACETTE_FIXED_ATTR_DEFAULTS, FACETTE_COMPANY, _norm as _fnorm
+    from facette_defaults import ESTORIL_FIXED_ATTR_DEFAULTS, ESTORIL_COMPANY, _norm as _fnorm
     attrs_in = dict(req.attributes or {})
     _have = {_fnorm(k) for k in attrs_in}
-    for k, v in FACETTE_FIXED_ATTR_DEFAULTS.items():
+    for k, v in ESTORIL_FIXED_ATTR_DEFAULTS.items():
         if _fnorm(k) not in _have:
             attrs_in[k] = v
-    for label, val in (("Üretici Adı", FACETTE_COMPANY["company_name"]),
-                       ("Üretici Mail Adresi", FACETTE_COMPANY["email"]),
-                       ("Üretici Adres Bilgisi", FACETTE_COMPANY["address"])):
+    for label, val in (("Üretici Adı", ESTORIL_COMPANY["company_name"]),
+                       ("Üretici Mail Adresi", ESTORIL_COMPANY["email"]),
+                       ("Üretici Adres Bilgisi", ESTORIL_COMPANY["address"])):
         if _fnorm(label) not in _have:
             attrs_in[label] = val
     payload = {

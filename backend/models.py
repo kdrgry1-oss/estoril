@@ -71,7 +71,7 @@ class ProductBase(BaseModel):
     sale_price: Optional[float] = None
     category_id: Optional[str] = None
     category_name: Optional[str] = None
-    brand: str = "FACETTE"
+    brand: str = "ESTORIL"
     images: List[str] = []
     variants: List[ProductVariant] = []
     is_active: bool = True
@@ -241,7 +241,7 @@ class MenuItem(BaseModel):
 class SiteSettings(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = "main"
-    site_name: str = "FACETTE"
+    site_name: str = "ESTORIL"
     logo_url: str = ""
     favicon_url: str = ""
     free_shipping_limit: float = 500

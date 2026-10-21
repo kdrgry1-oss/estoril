@@ -87,7 +87,7 @@ class DoganClient:
         """Authenticate and get session ID. Raises on failure."""
         try:
             client = _get_cached_client(self.auth_wsdl, self.transport, self.zeep_settings)
-            header = {"SESSION_ID": "", "APPLICATION_NAME": "FACETTE"}
+            header = {"SESSION_ID": "", "APPLICATION_NAME": "ESTORIL"}
             result = client.service.Login(
                 REQUEST_HEADER=header,
                 USER_NAME=self.username,
@@ -125,7 +125,7 @@ class DoganClient:
             return
         try:
             client = _get_cached_client(self.auth_wsdl, self.transport, self.zeep_settings)
-            header = {"SESSION_ID": self.session_id, "APPLICATION_NAME": "FACETTE"}
+            header = {"SESSION_ID": self.session_id, "APPLICATION_NAME": "ESTORIL"}
             client.service.Logout(REQUEST_HEADER=header)
             self.session_id = None
         except Exception as e:
@@ -144,7 +144,7 @@ class DoganClient:
     def _make_header(self, compressed="N"):
         return {
             "SESSION_ID": self.session_id,
-            "APPLICATION_NAME": "FACETTE",
+            "APPLICATION_NAME": "ESTORIL",
             "COMPRESSED": compressed,
         }
 

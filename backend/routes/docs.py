@@ -15,12 +15,12 @@ DOCS_DIR = Path("/app/docs")
 AVAILABLE_DOCS = {
     "build-spec": {
         "filename": "BUILD_SPEC.md",
-        "download_name": "FACETTE_Build_Specification.md",
+        "download_name": "ESTORIL_Build_Specification.md",
         "title": "Yazılımcıya Verilecek Build Specification",
     },
     "system-docs": {
         "filename": "SYSTEM_DOCS.md",
-        "download_name": "FACETTE_System_Documentation.md",
+        "download_name": "ESTORIL_System_Documentation.md",
         "title": "Mevcut Sistemin Dokümantasyonu",
     },
 }

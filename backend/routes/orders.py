@@ -1346,7 +1346,7 @@ async def dispatch_purchase_capi(order_id: str, source: str = "") -> bool:
         items_payload = [{
             "item_id": str(it.get("product_id") or it.get("sku") or ""),
             "item_name": it.get("name") or "",
-            "item_brand": it.get("brand") or "FACETTE",
+            "item_brand": it.get("brand") or "ESTORIL",
             "item_variant": f"{it.get('size','')} {it.get('color','')}".strip(),
             "price": float(it.get("unit_price") or it.get("price") or 0),
             "quantity": int(it.get("quantity") or 1),
@@ -2662,7 +2662,7 @@ async def create_invoice_for_order(
             issue_date=issue_date,
             issue_time=issue_time,
             supplier_vkn=dogan_settings.get("vkn") or "7810816779",
-            supplier_name=dogan_settings.get("supplier_name") or "FACETTE DIŞ TİC. A.Ş.",
+            supplier_name=dogan_settings.get("supplier_name") or "ESTORIL DIŞ TİC. A.Ş.",
             supplier_district=dogan_settings.get("supplier_district") or "KÜÇÜKÇEKMECE",
             supplier_city=dogan_settings.get("supplier_city") or "İstanbul",
             supplier_street=dogan_settings.get("supplier_street") or "İkitelli O.S.B. İmsan San. Sit. D BLOK NO:3",
@@ -2853,7 +2853,7 @@ async def create_invoice_for_order(
             issue_date=issue_date,
             issue_time=issue_time,
             supplier_vkn=dogan_settings.get("vkn") or "7810816779",
-            supplier_name=dogan_settings.get("supplier_name") or "FACETTE DIŞ TİC. A.Ş.",
+            supplier_name=dogan_settings.get("supplier_name") or "ESTORIL DIŞ TİC. A.Ş.",
             supplier_district=dogan_settings.get("supplier_district") or "KÜÇÜKÇEKMECE",
             supplier_city=dogan_settings.get("supplier_city") or "İstanbul",
             supplier_street=dogan_settings.get("supplier_street") or "İkitelli O.S.B. İmsan San. Sit. D BLOK NO:3",
@@ -3084,8 +3084,8 @@ async def print_invoice_html(order_id: str, token: str = None):
 </style></head><body>
 <div class="header">
   <div>
-    <div class="brand">FACETTE</div>
-    <div class="meta">Facette E-Ticaret · facette.com.tr</div>
+    <div class="brand">ESTORIL</div>
+    <div class="meta">Estoril E-Ticaret · facette.com.tr</div>
   </div>
   <div style="text-align:right">
     <h1>{'E-ARŞİV FATURA' if order.get('invoice_type')=='e-arsiv' else 'E-FATURA'}</h1>
@@ -3145,7 +3145,7 @@ async def _get_mng_settings() -> dict:
     return {
         "username": s.get("username") or "490059279",
         "password": s.get("password") or "Face.0024E",
-        "customer_code": s.get("customer_code") or "FACETTE DIŞ TİC.A.Ş.",
+        "customer_code": s.get("customer_code") or "ESTORIL DIŞ TİC.A.Ş.",
         "tax_no": s.get("tax_no") or "6080712084",
         "is_active": s.get("is_active", True),
     }
@@ -3153,11 +3153,11 @@ async def _get_mng_settings() -> dict:
 
 async def _get_sender_info() -> dict:
     """Mağaza/Gönderici + İADE ALICI (şirket) bilgilerini DB'den çeker (settings.id=store_info).
-    store_info boşsa FACETTE şirket adresine düşer → iade gönderisinin alıcı adresi HER ZAMAN dolu
+    store_info boşsa ESTORIL şirket adresine düşer → iade gönderisinin alıcı adresi HER ZAMAN dolu
     olur ve MNG/DHL barkodu gerçekten üretilebilir (boş adres yüzünden barkod üretilememe sorunu çözülür)."""
     store = await db.settings.find_one({"id": "store_info"}, {"_id": 0}) or {}
     return {
-        "name": store.get("sender_name") or "FACETTE DIŞ TİCARET A.Ş.",
+        "name": store.get("sender_name") or "ESTORIL DIŞ TİCARET A.Ş.",
         "phone": _normalize_phone(store.get("sender_phone") or "5433300310"),
         "address": store.get("sender_address") or "İkitelli OSB Mah. İMSAN D Blok No: 3",
         "city": store.get("sender_city") or "İstanbul",
@@ -4118,7 +4118,7 @@ async def get_cargo_label(order_id: str, token: str = None):
     tracking_line = ""
     sender = await _get_sender_info()
     mng = await _get_mng_settings()
-    sender_company = mng.get("customer_code") or sender["name"] or "FACETTE"
+    sender_company = mng.get("customer_code") or sender["name"] or "ESTORIL"
     sender_addr_line = f"{sender['address']}, {sender['district']}/{sender['city']}".strip(" ,/")
 
     ship = order.get("shipping_address") or {}
@@ -4178,7 +4178,7 @@ async def get_cargo_label(order_id: str, token: str = None):
             return f"{digits[0:3]} {digits[3:6]} {digits[6:8]} {digits[8:10]}"
         return str(p)
 
-    # Brand logo (PNG → base64) — paylaşılan FACETTE wordmark
+    # Brand logo (PNG → base64) — paylaşılan ESTORIL wordmark
     import base64, pathlib
     logo_b64 = ""
     try:
@@ -4231,7 +4231,7 @@ async def get_cargo_label(order_id: str, token: str = None):
 
     <!-- LOGO BANDI -->
     <div class="logo-band">
-      {('<img src="'+logo_src+'" alt="FACETTE"/>') if logo_src else '<div class="logo-fallback">FACETTE</div>'}
+      {('<img src="'+logo_src+'" alt="ESTORIL"/>') if logo_src else '<div class="logo-fallback">ESTORIL</div>'}
     </div>
 
     <!-- GÖNDERİCİ BİLGİLERİ -->
@@ -4310,7 +4310,7 @@ async def get_mng_settings(current_user: dict = Depends(require_admin)):
     """MNG Kargo ayarlarını döndür (şifre maskelenir)."""
     s = await db.settings.find_one({"id": "mng_kargo"}, {"_id": 0}) or {}
     return {
-        "customer_code": s.get("customer_code") or "FACETTE DIS TIC.A.S.",
+        "customer_code": s.get("customer_code") or "ESTORIL DIS TIC.A.S.",
         "username": s.get("username") or "490059279",
         "password": "********" if s.get("password") else "",
         "tax_no": s.get("tax_no") or "6080712084",
@@ -4324,7 +4324,7 @@ async def get_mng_settings(current_user: dict = Depends(require_admin)):
 async def save_mng_settings(payload: dict, current_user: dict = Depends(require_admin)):
     """MNG Kargo ayarlarını kaydet."""
     update = {
-        "customer_code": payload.get("customer_code", "FACETTE DIŞ TİC.A.Ş."),
+        "customer_code": payload.get("customer_code", "ESTORIL DIŞ TİC.A.Ş."),
         "username": payload.get("username", ""),
         "tax_no": payload.get("tax_no", ""),
         "is_active": bool(payload.get("is_active", True)),
@@ -4501,7 +4501,7 @@ RETURN_CONTRACT_NO = "490059279"
 def _company_return_address(warehouse: dict) -> str:
     """İade paketinin gideceği ŞİRKET (alıcı) adresini tek satır metne çevirir (müşteriye gösterilir)."""
     w = warehouse or {}
-    parts = [w.get("name") or "FACETTE DIŞ TİCARET A.Ş.",
+    parts = [w.get("name") or "ESTORIL DIŞ TİCARET A.Ş.",
              (w.get("address") or "").strip(),
              "/".join([x for x in [w.get("district"), w.get("city")] if x])]
     return " · ".join([p for p in parts if p])

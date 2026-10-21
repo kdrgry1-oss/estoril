@@ -43,7 +43,7 @@ async def get_maintenance_status():
         "maintenance_title": settings.get("maintenance_title") or "Sitemiz sizin için yenileniyor",
         "maintenance_message": settings.get("maintenance_message") or "Çok yakında, daha iyi bir alışveriş deneyimiyle buradayız. Anlayışınız için teşekkür ederiz.",
         "logo_url": settings.get("logo_url") or "",
-        "site_name": settings.get("site_name") or "FACETTE",
+        "site_name": settings.get("site_name") or "ESTORIL",
     }
 
 @router.get("")
@@ -53,7 +53,7 @@ async def get_settings():
     if not settings:
         settings = {
             "id": "main",
-            "site_name": "FACETTE",
+            "site_name": "ESTORIL",
             "logo_url": "",
             "free_shipping_limit": 500,
             "rotating_texts": [],
@@ -140,7 +140,7 @@ def _seed_default_banks():
         "bank_name": "TÜRKİYE İŞ BANKASI",
         "branch": "CUMHURİYET CADDESİ ESENYURT ŞUBESİ",
         "iban": "TR86 0006 4000 0011 4540 1414 67",
-        "account_holder": "FACETTE DIŞ TİC. A.Ş",
+        "account_holder": "ESTORIL DIŞ TİC. A.Ş",
         "is_default": True,
     }]
 
@@ -335,7 +335,7 @@ async def get_email_smtp(current_user: dict = Depends(require_admin)):
         "port": int(s.get("port", 465)),
         "secure": s.get("secure", "ssl"),
         "username": s.get("username", ""),
-        "from_name": s.get("from_name", "FACETTE"),
+        "from_name": s.get("from_name", "ESTORIL"),
         "password_set": bool(s.get("password")),
     }
 
@@ -351,7 +351,7 @@ async def save_email_smtp(payload: Dict[str, Any], current_user: dict = Depends(
         "port": int(payload.get("port") or 465),
         "secure": (str(payload.get("secure") or "ssl")).strip().lower(),
         "username": (str(payload.get("username") or "")).strip(),
-        "from_name": (str(payload.get("from_name") or "FACETTE")).strip(),
+        "from_name": (str(payload.get("from_name") or "ESTORIL")).strip(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
     # Şifre yalnızca yeni değer girildiyse güncellenir; boş bırakılırsa mevcut korunur.
@@ -371,7 +371,7 @@ async def test_email_smtp(payload: Dict[str, Any], current_user: dict = Depends(
     from email_smtp import send_smtp_email
     res = await send_smtp_email(
         db, to,
-        "Facette SMTP Test",
+        "Estoril SMTP Test",
         "<p>Bu bir test e-postasıdır. Zoho SMTP ayarlarınız çalışıyor 🎉</p>",
     )
     if not res.get("success"):

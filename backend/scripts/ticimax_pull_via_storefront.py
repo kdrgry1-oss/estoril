@@ -31,7 +31,7 @@ load_dotenv("/app/backend/.env")
 
 BASE = "https://www.facette.com.tr"
 SITEMAP = f"{BASE}/sitemap/products/0.xml"
-HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; FacetteSync/1.0)"}
+HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; EstorilSync/1.0)"}
 
 
 def _slugify(text: str) -> str:
@@ -118,7 +118,7 @@ def _build_product_doc(pdm: dict, kart_id: int, page_url: str,
     """productDetailModel → bizim DB product schema'mıza dönüştür."""
     name = (pdm.get("productName") or "").strip()
     stock_code = (pdm.get("stockCode") or "").strip()
-    brand = (pdm.get("brandName") or "FACETTE").strip()
+    brand = (pdm.get("brandName") or "ESTORIL").strip()
     description = (pdm.get("productShortDescription") or name).strip()
 
     bc = pdm.get("breadCrumb") or []
@@ -205,7 +205,7 @@ def _build_product_doc(pdm: dict, kart_id: int, page_url: str,
         "member_price_1": list_price_kdv_inc,
         "cost_price": cost_price,
         "vat_rate": vat_rate,
-        "vendor": brand or "FACETTE",
+        "vendor": brand or "ESTORIL",
         "description": description,
         "category_name": category_leaf,
         "breadcrumb": breadcrumb_str,

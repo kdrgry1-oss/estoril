@@ -1,6 +1,6 @@
 """
 =============================================================================
-newsletter.py — "Facette Kulübü" bülten aboneliği
+newsletter.py — "Estoril Kulübü" bülten aboneliği
 =============================================================================
 Footer üstündeki bülten bloğu ve genel e-posta abonelikleri için basit,
 tekilleştirilmiş kayıt. İzin (İYS/EPOSTA) NetGSM entegratörü üzerinden
@@ -42,7 +42,7 @@ async def subscribe(payload: dict, request: Request):
     if existing:
         # Zaten kayıtlı — sessizce başarı döndür (kullanıcıya "zaten abonesiniz").
         return {"success": True, "already": True,
-                "message": "Zaten Facette Kulübü üyesisiniz."}
+                "message": "Zaten Estoril Kulübü üyesisiniz."}
 
     await db.newsletter_subscribers.insert_one({
         "id": generate_id(),
@@ -65,7 +65,7 @@ async def subscribe(payload: dict, request: Request):
         pass
 
     return {"success": True, "already": False,
-            "message": "Facette Kulübü'ne hoş geldiniz!"}
+            "message": "Estoril Kulübü'ne hoş geldiniz!"}
 
 
 @admin_router.get("/subscribers")

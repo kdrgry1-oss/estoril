@@ -1,5 +1,5 @@
 """
-Facette E-Commerce API - Main Server
+Estoril E-Commerce API - Main Server
 Modular architecture with routes
 """
 from fastapi import FastAPI, APIRouter
@@ -120,7 +120,7 @@ from routes.deps import client, db
 async def lifespan(app: FastAPI):
     """Application lifespan - startup and shutdown"""
     # Startup
-    logger.info("Starting Facette E-Commerce API...")
+    logger.info("Starting Estoril E-Commerce API...")
     
     try:
         # Create admin user if not exists
@@ -361,7 +361,7 @@ async def lifespan(app: FastAPI):
 
 # Create FastAPI app
 app = FastAPI(
-    title="Facette E-Commerce API",
+    title="Estoril E-Commerce API",
     version="3.0",
     description="Modular E-Commerce API with Iyzico, Trendyol, MNG Kargo, GIB integrations",
     lifespan=lifespan
@@ -726,7 +726,7 @@ api_router.include_router(inbound_mail_router)
 @api_router.get("/")
 async def root():
     return {
-        "message": "Facette E-Commerce API",
+        "message": "Estoril E-Commerce API",
         "version": "3.0",
         "status": "running"
     }

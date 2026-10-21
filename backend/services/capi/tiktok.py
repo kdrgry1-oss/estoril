@@ -150,7 +150,7 @@ async def test_connection(pixel_id: str, access_token: str,
         event_name="lead", event_id=f"test-{int(datetime.now().timestamp())}",
         event_time=None,
         user_data={"client_ip_address": "8.8.8.8",
-                   "client_user_agent": "Mozilla/5.0 FacetteTest"},
+                   "client_user_agent": "Mozilla/5.0 EstorilTest"},
         event_payload={"value": 0, "currency": "TRY"},
         test_event_code=test_event_code,
     )

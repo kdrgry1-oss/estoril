@@ -1,6 +1,6 @@
 """
 Tests for New Features: Variants, Similar/Combo Products, Cargo, Ship Order
-Facette E-Commerce Platform - Iteration 3
+Estoril E-Commerce Platform - Iteration 3
 """
 import pytest
 import requests
