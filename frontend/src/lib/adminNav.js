@@ -80,7 +80,6 @@ export const navigationGroups = [
     label: "Tasarım",     // ← eski adı "İçerik"
     icon: PenTool,
     children: [
-      { label: "Tema Yönetimi", path: "/admin/temalar", icon: Palette },
       { label: "Bannerlar & Sliderlar", path: "/admin/bannerlar", icon: Image },
       { label: "Popuplar", path: "/admin/popuplar", icon: BellRing },
       { label: "Duyurular", path: "/admin/duyurular", icon: BellRing },
@@ -104,12 +103,6 @@ export const navigationGroups = [
       { label: "Destek Talepleri", path: "/admin/tickets", icon: MessageSquare },
       { label: "Bloklu Müşteriler", path: "/admin/bloklu-musteriler", icon: Users },
     ],
-  },
-  {
-    key: "gorevler",
-    label: "Görevler",
-    path: "/admin/gorevler",
-    icon: CheckSquare,
   },
   {
     key: "pazarlama",

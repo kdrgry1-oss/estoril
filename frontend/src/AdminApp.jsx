@@ -114,7 +114,6 @@ export default function AdminApp() {
         <Route path="bannerlar" element={<AdminBanners />} />
         <Route path="estoril-site" element={<EstorilSite />} />
         <Route path="mail-accounts" element={<MailAccounts />} />
-        <Route path="temalar" element={<Themes />} />
         <Route path="kampanyalar" element={<AdminCampaigns />} />
         <Route path="entegrasyonlar" element={<AdminIntegrations />} />
         <Route path="odeme-tipleri" element={<Payments />} />
@@ -194,7 +193,6 @@ export default function AdminApp() {
         <Route path="toplu-mail" element={<BulkMail />} />
         <Route path="raporlar/gelismis" element={<ExtraReports />} />
         <Route path="raporlar/kar-stok" element={<ReportsExtended />} />
-        <Route path="gorevler" element={<AdminTasks />} />
       </Route>
     </Routes>
   );
