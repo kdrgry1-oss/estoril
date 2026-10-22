@@ -18,6 +18,7 @@ export default function Integrations() {
   const [importing, setImporting] = useState(false);
   const [statuses, setStatuses] = useState({
     iyzico: { configured: false, mode: "sandbox" },
+    paytr: { configured: false, mode: "sandbox" },
     trendyol: { configured: false, mode: "sandbox" },
     hepsiburada: { configured: false, mode: "sandbox" },
     temu: { configured: false, mode: "sandbox" },
@@ -62,6 +63,13 @@ export default function Integrations() {
     api_key: "", api_secret: "", mode: "sandbox", is_active: false
   });
   const [iyzicoTesting, setIyzicoTesting] = useState(false);
+
+  // PayTR state (generic marketplace-settings: merchant_id + api_key[=key] + api_secret[=salt])
+  const [paytrModalOpen, setPaytrModalOpen] = useState(false);
+  const [paytrSettings, setPaytrSettings] = useState({
+    merchant_id: "", api_key: "", api_secret: "", mode: "sandbox", is_active: false
+  });
+  const [paytrTesting, setPaytrTesting] = useState(false);
 
   // Cargo providers state (generic)
   const [cargoModalOpen, setCargoModalOpen] = useState(false);
@@ -120,18 +128,20 @@ export default function Integrations() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch integration statuses
-      const [paymentRes, trendyolRes, gibRes, xmlRes, hbRes, temuRes] = await Promise.all([
+      const [paymentRes, trendyolRes, gibRes, xmlRes, hbRes, temuRes, paytrRes] = await Promise.all([
         axios.get(`${API}/integrations/payment/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
         axios.get(`${API}/integrations/trendyol/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
         axios.get(`${API}/integrations/dogan/settings`, { headers }).catch(() => ({ data: { enabled: false } })),
         axios.get(`${API}/integrations/xml/status`, { headers }).catch(() => ({ data: { last_sync: null } })),
         axios.get(`${API}/integrations/hepsiburada/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
-        axios.get(`${API}/integrations/temu/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } }))
+        axios.get(`${API}/integrations/temu/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
+        axios.get(`${API}/integrations/paytr/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } }))
       ]);
 
       setStatuses(prev => ({
         ...prev,
         iyzico: paymentRes.data,
+        paytr: paytrRes.data,
         trendyol: trendyolRes.data,
         hepsiburada: hbRes.data,
         temu: temuRes.data,
@@ -357,6 +367,20 @@ export default function Integrations() {
       actions: [
         { label: "Ayarları Yapılandır", icon: <CreditCard size={16} />, onClick: () => fetchMarketplaceSettings('iyzico', setIyzicoSettings, setIyzicoModalOpen), loading: false },
         { label: "Bağlantı Test Et", icon: <RefreshCw size={16} />, onClick: () => testMarketplaceConnection('iyzico', setIyzicoTesting), loading: iyzicoTesting, disabled: !statuses.iyzico?.configured }
+      ]
+    },
+    {
+      id: "paytr",
+      name: "PayTR",
+      description: "Online ödeme altyapısı - Kredi/banka kartı, iFrame ile güvenli ödeme (iyzico alternatifi)",
+      icon: <CreditCard className="w-8 h-8" />,
+      status: statuses.paytr,
+      color: "blue",
+      instructions: "PayTR Mağaza Paneli → Ayarlar → Entegrasyon'dan Mağaza No, Mağaza Parolası (merchant_key) ve Mağaza Gizli Anahtarı (merchant_salt) alınız. Bildirim URL'si: /api/payment/paytr/callback",
+      envKeys: [],
+      actions: [
+        { label: "Ayarları Yapılandır", icon: <CreditCard size={16} />, onClick: () => fetchMarketplaceSettings('paytr', setPaytrSettings, setPaytrModalOpen), loading: false },
+        { label: "Bağlantı Test Et", icon: <RefreshCw size={16} />, onClick: () => testMarketplaceConnection('paytr', setPaytrTesting), loading: paytrTesting, disabled: !statuses.paytr?.configured }
       ]
     },
     {
@@ -782,6 +806,65 @@ export default function Integrations() {
             <div className="flex justify-end gap-2 pt-4 border-t">
               <button type="button" onClick={() => setIyzicoModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">İptal</button>
               <button data-testid="iyzico-save-btn" type="submit" disabled={savingSettings} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
+                {savingSettings ? "Kaydediliyor..." : "Kaydet"}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* PayTR Settings Modal */}
+      <Dialog open={paytrModalOpen} onOpenChange={setPaytrModalOpen}>
+        <DialogContent data-testid="paytr-settings-modal">
+          <DialogHeader>
+            <DialogTitle>PayTR API Ayarları</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); saveMarketplaceSettings('paytr', paytrSettings, setPaytrModalOpen); }} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Mağaza No (Merchant ID)</label>
+              <input data-testid="paytr-merchant-id" type="text" required value={paytrSettings.merchant_id || ''}
+                onChange={(e) => setPaytrSettings({ ...paytrSettings, merchant_id: e.target.value })}
+                placeholder="123456"
+                className="w-full border px-3 py-2 rounded text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Mağaza Parolası (Merchant Key)</label>
+              <input data-testid="paytr-api-key" type="password" value={paytrSettings.api_key || ''}
+                onChange={(e) => setPaytrSettings({ ...paytrSettings, api_key: e.target.value })}
+                placeholder={paytrSettings.api_key === "********" ? "********" : "Mağaza Parolası"}
+                className="w-full border px-3 py-2 rounded text-sm" />
+              <p className="text-xs text-gray-500 mt-1">Sadece güncellemek istediğinizde doldurun</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Mağaza Gizli Anahtarı (Merchant Salt)</label>
+              <input data-testid="paytr-api-secret" type="password" value={paytrSettings.api_secret || ''}
+                onChange={(e) => setPaytrSettings({ ...paytrSettings, api_secret: e.target.value })}
+                placeholder={paytrSettings.api_secret === "********" ? "********" : "Mağaza Gizli Anahtarı"}
+                className="w-full border px-3 py-2 rounded text-sm" />
+              <p className="text-xs text-gray-500 mt-1">Sadece güncellemek istediğinizde doldurun</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Mod</label>
+              <select value={paytrSettings.mode || "sandbox"}
+                onChange={e => setPaytrSettings({ ...paytrSettings, mode: e.target.value })}
+                className="w-full border px-3 py-2 rounded text-sm bg-white">
+                <option value="sandbox">Test Modu</option>
+                <option value="live">Canlı Mod</option>
+              </select>
+            </div>
+            <label className="flex items-center gap-2 mt-2">
+              <input data-testid="paytr-is-active" type="checkbox" checked={!!paytrSettings.is_active}
+                onChange={(e) => setPaytrSettings({ ...paytrSettings, is_active: e.target.checked })} />
+              <span className="text-sm">Entegrasyon Aktif</span>
+            </label>
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800">
+              <b>Bildirim (Callback) URL:</b> PayTR panelinde "Bildirim URL" alanına
+              <code className="bg-blue-100 px-1 rounded mx-1">https://panel.estoril.com.tr/api/payment/paytr/callback</code>
+              yazın. Ödeme sonucu buraya iletilir ve sipariş otomatik "ödendi" işaretlenir.
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <button type="button" onClick={() => setPaytrModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">İptal</button>
+              <button data-testid="paytr-save-btn" type="submit" disabled={savingSettings} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
                 {savingSettings ? "Kaydediliyor..." : "Kaydet"}
               </button>
             </div>

@@ -1806,6 +1806,8 @@ ALLOWED_MARKETPLACES = {
     "hepsiburada", "temu", "whatsapp", "instagram", "messenger", "site",
     # cargo providers
     "mng", "aras", "yurtici", "ptt", "hepsijet", "trendyol_express", "surat", "ups", "dhl",
+    # payment gateways (generic settings; merchant_id + api_key[=key] + api_secret[=salt])
+    "paytr",
 }
 @router.get("/{marketplace}/settings")
 async def get_marketplace_settings(marketplace: str, current_user: dict = Depends(require_admin)):
@@ -1844,6 +1846,8 @@ async def save_marketplace_settings(marketplace: str, payload: dict, current_use
         fields_by_mp = {
             "hepsiburada": ["merchant_id", "secret_key", "dev_username"],
             "temu": ["api_key", "api_secret"],
+            # PayTR: merchant_id + merchant_key(api_key) + merchant_salt(api_secret)
+            "paytr": ["merchant_id", "api_key", "api_secret"],
         }
         required = fields_by_mp.get(marketplace, ["api_key", "api_secret"])
         missing = []
@@ -1894,6 +1898,9 @@ async def get_marketplace_status(marketplace: str):
         configured = bool(settings.get("is_active") and settings.get("merchant_id")
                           and (settings.get("secret_key") or settings.get("password"))
                           and settings.get("dev_username"))
+    elif marketplace == "paytr":
+        configured = bool(settings.get("is_active") and settings.get("merchant_id")
+                          and settings.get("api_key") and settings.get("api_secret"))
     else:
         configured = bool(settings.get("is_active") and (settings.get("api_key") or settings.get("merchant_id")))
     return {
@@ -1990,6 +1997,41 @@ async def test_marketplace_connection(marketplace: str, current_user: dict = Dep
             if not (user or key) or not (pw or settings.get("customer_code")):
                 return {"success": False, "message": f"{marketplace.upper()} kimlik bilgileri eksik"}
             return {"success": True, "message": f"{marketplace.upper()} kimlik bilgileri kaydedildi (canlı test yapılmadı)"}
+
+        if marketplace == "paytr":
+            import time as _t, hmac as _hmac, hashlib as _hl, json as _j
+            mid = (settings.get("merchant_id") or "").strip()
+            key = (settings.get("api_key") or "").strip()      # merchant_key
+            salt = (settings.get("api_secret") or "").strip()  # merchant_salt
+            if not (mid and key and salt):
+                return {"success": False, "message": "PayTR için Merchant No, Merchant Key ve Merchant Salt zorunlu"}
+            mode_ = settings.get("mode", "sandbox")
+            test_mode = 0 if mode_ in ("live", "production", "prod", "canli", "canlı") else 1
+            # Gerçek probe: minimal get-token isteği (TAHSİLAT YOK, sadece token üretir).
+            oid = "TEST" + _hl.sha1(str(_t.time()).encode()).hexdigest()[:12]
+            amount, ip, email = 100, "85.34.78.112", "test@estoril.com.tr"
+            no_ins, max_ins, cur = 0, 0, "TL"
+            basket = base64.b64encode(_j.dumps([["Baglanti Testi", "1.00", 1]]).encode()).decode()
+            hash_str = f"{mid}{ip}{oid}{email}{amount}{basket}{no_ins}{max_ins}{cur}{test_mode}"
+            tok = base64.b64encode(_hmac.new(key.encode(), (hash_str + salt).encode(), _hl.sha256).digest()).decode()
+            form = {
+                "merchant_id": mid, "user_ip": ip, "merchant_oid": oid, "email": email,
+                "payment_amount": amount, "paytr_token": tok, "user_basket": basket,
+                "debug_on": 1, "no_installment": no_ins, "max_installment": max_ins,
+                "user_name": "Baglanti Testi", "user_address": "Test", "user_phone": "05000000000",
+                "merchant_ok_url": "https://estoril.com.tr/odeme/ok",
+                "merchant_fail_url": "https://estoril.com.tr/odeme/fail",
+                "timeout_limit": 30, "currency": cur, "test_mode": test_mode,
+            }
+            async with httpx.AsyncClient(timeout=20) as c:
+                r = await c.post("https://www.paytr.com/odeme/api/get-token", data=form)
+            try:
+                data = r.json()
+            except Exception:
+                return {"success": False, "message": f"PayTR beklenmeyen yanıt: {r.text[:150]}"}
+            if data.get("status") == "success":
+                return {"success": True, "message": f"PayTR bağlantısı başarılı ({'test' if test_mode else 'canlı'} mod)"}
+            return {"success": False, "message": f"PayTR kimlik/ayar hatası: {data.get('reason') or str(data)[:200]}"}
 
         # Default fallback for other marketplaces (whatsapp/instagram/site channels etc.)
         if not (settings.get("api_key") or settings.get("username")):

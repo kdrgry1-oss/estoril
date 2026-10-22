@@ -568,6 +568,8 @@ api_router.include_router(stock_notify_router)
 
 from routes.payment import router as payment_router
 api_router.include_router(payment_router)
+from routes.payment_paytr import router as payment_paytr_router
+api_router.include_router(payment_paytr_router)
 
 # Include all route modules
 api_router.include_router(auth_router)

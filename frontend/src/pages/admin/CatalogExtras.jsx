@@ -484,6 +484,7 @@ export function ShippingPaymentRules() {
                     <select value={form.payment_method || "havale"} onChange={(e) => setForm({ ...form, payment_method: e.target.value })} className="w-full mt-1 px-3 py-2 border rounded text-sm">
                       <option value="havale">Havale/EFT</option>
                       <option value="iyzico">Kredi Kartı (Iyzico)</option>
+                      <option value="paytr">Kredi Kartı (PayTR)</option>
                       <option value="cash_on_delivery">Kapıda Ödeme</option>
                     </select>
                   </div>
