@@ -149,6 +149,81 @@ async def rfm_analysis(
 
 
 # ---------------------------------------------------------------------------
+# HEDEF KİTLE / AUDIENCE PROFILE (first-party, KVKK-uyumlu)
+# ---------------------------------------------------------------------------
+@router.get("/analytics-extra/audience")
+async def audience_profile(
+    lookback_days: int = Query(365, ge=30, le=1460),
+    top: int = Query(15, ge=5, le=50),
+    current_user: dict = Depends(require_admin),
+):
+    """Kendi (first-party) sipariş verisinden toplu hedef-kitle profili.
+
+    Reklam platformlarında (Meta/Google/TikTok) COĞRAFİ + İLGİ hedefleme ve
+    Lookalike seed kararı için kullanılır. Kişisel liste değil — yalnızca
+    toplulaştırılmış dağılımlar döner (KVKK açısından güvenli).
+    """
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=lookback_days)).isoformat()
+    base = {"created_at": {"$gte": cutoff}, "status": {"$nin": ["cancelled", "failed"]}}
+
+    async def agg(extra):
+        return await db.orders.aggregate([{"$match": base}] + extra).to_list(length=2000)
+
+    city_g = {"$ifNull": ["$shipping_address.city", {"$ifNull": ["$billing_address.city", "$city"]}]}
+    dist_g = {"$ifNull": ["$shipping_address.district", {"$ifNull": ["$shipping_address.ilce", "$district"]}]}
+    total_expr = {"$ifNull": ["$total", "$total_amount"]}
+
+    cities = await agg([
+        {"$group": {"_id": city_g, "orders": {"$sum": 1}, "revenue": {"$sum": total_expr}}},
+        {"$match": {"_id": {"$nin": [None, ""]}}}, {"$sort": {"orders": -1}}, {"$limit": top}])
+    districts = await agg([
+        {"$group": {"_id": dist_g, "orders": {"$sum": 1}}},
+        {"$match": {"_id": {"$nin": [None, ""]}}}, {"$sort": {"orders": -1}}, {"$limit": top}])
+    cats = await agg([
+        {"$unwind": "$items"},
+        {"$group": {"_id": {"$ifNull": ["$items.category_name", {"$ifNull": ["$items.category", "Diğer"]}]},
+                    "qty": {"$sum": {"$ifNull": ["$items.quantity", 1]}}, "orders": {"$sum": 1}}},
+        {"$match": {"_id": {"$nin": [None, ""]}}}, {"$sort": {"qty": -1}}, {"$limit": top}])
+    corp = await agg([
+        {"$group": {"_id": {"$ifNull": ["$billing_info.is_corporate", False]}, "n": {"$sum": 1}}}])
+    bands = await agg([
+        {"$bucket": {"groupBy": total_expr, "boundaries": [0, 500, 1000, 2500, 5000, 10000, 1000000000],
+                     "default": "diger", "output": {"n": {"$sum": 1}}}}])
+    per_cust = await agg([
+        {"$group": {"_id": {"$ifNull": ["$customer_email", {"$ifNull": ["$email", "$shipping_address.email"]}]},
+                    "cnt": {"$sum": 1}, "spent": {"$sum": total_expr}}},
+        {"$match": {"_id": {"$ne": None}}}])
+
+    total_customers = len(per_cust)
+    returning = sum(1 for p in per_cust if (p.get("cnt") or 0) > 1)
+    total_orders = sum((p.get("cnt") or 0) for p in per_cust)
+    total_revenue = sum((p.get("spent") or 0) for p in per_cust)
+    corp_map = {"corporate": 0, "individual": 0}
+    for c in corp:
+        corp_map["corporate" if c["_id"] else "individual"] += c["n"]
+    band_labels = {0: "0–500₺", 500: "500–1.000₺", 1000: "1.000–2.500₺",
+                   2500: "2.500–5.000₺", 5000: "5.000–10.000₺", 10000: "10.000₺+"}
+
+    return {
+        "lookback_days": lookback_days,
+        "summary": {
+            "total_customers": total_customers,
+            "total_orders": total_orders,
+            "total_revenue": round(total_revenue, 2),
+            "aov": round(total_revenue / total_orders, 2) if total_orders else 0,
+            "new_customers": total_customers - returning,
+            "returning_customers": returning,
+            "repeat_rate": round(returning / total_customers * 100, 1) if total_customers else 0,
+        },
+        "cities": [{"name": c["_id"], "orders": c["orders"], "revenue": round(c.get("revenue") or 0, 2)} for c in cities],
+        "districts": [{"name": d["_id"], "orders": d["orders"]} for d in districts],
+        "categories": [{"name": c["_id"], "qty": c["qty"], "orders": c["orders"]} for c in cats],
+        "customer_type": corp_map,
+        "order_value_bands": [{"band": band_labels.get(b["_id"], str(b["_id"])), "count": b["n"]} for b in bands],
+    }
+
+
+# ---------------------------------------------------------------------------
 # MARKETPLACE PROFIT REPORT
 # ---------------------------------------------------------------------------
 @router.get("/analytics-extra/marketplace-profit")

@@ -99,6 +99,7 @@ export const navigationGroups = [
       { label: "Üye Listesi", path: "/admin/uyeler", icon: Users },
       { label: "Üye Grupları (B2B)", path: "/admin/uye-gruplari", icon: Users },
       { label: "Müşteri Segmentleri (RFM)", path: "/admin/musteri-segmentleri", icon: Users },
+      { label: "Hedef Kitle (Reklam)", path: "/admin/hedef-kitle", icon: TrendingUp },
       { label: "Müşteri Soruları", path: "/admin/sorular", icon: MessageSquare },
       { label: "Destek Talepleri", path: "/admin/tickets", icon: MessageSquare },
       { label: "Bloklu Müşteriler", path: "/admin/bloklu-musteriler", icon: Users },
