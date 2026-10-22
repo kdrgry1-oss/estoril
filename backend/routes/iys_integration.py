@@ -287,6 +287,78 @@ async def iys_register(p: IYSRegister, _=Depends(require_admin)):
     return {"ok": bool(res.get("recorded")), "via": "netgsm", **res}
 
 
+@router.get("/status-direct")
+async def iys_status_direct(_=Depends(require_admin)):
+    """Doğrudan (aracısız) resmi İYS API durumu: token + marka kodu hazır mı?"""
+    tok = await _get_token()
+    return {
+        "configured": bool(tok and IYS_BRAND),
+        "token_ok": bool(tok),
+        "brand_code": IYS_BRAND or "(eksik)",
+        "base_url": IYS_BASE,
+        "channel": "iys-direct (aracısız — api.iys.org.tr)",
+        "hint": ("" if (tok and IYS_BRAND) else
+                 "Secrets Vault → IYS_API_USERNAME / IYS_API_PASSWORD + ortam değişkeni IYS_BRAND_CODE gerekli."),
+    }
+
+
+@router.post("/register-direct")
+async def iys_register_direct(p: IYSRegister, _=Depends(require_admin)):
+    """İzin ekle — DOĞRUDAN resmi İYS'ye (api.iys.org.tr). ARACI (NetGSM vb.) YOK.
+
+    Gerekli: Secrets Vault/env → IYS_API_USERNAME, IYS_API_PASSWORD ve marka kodu
+    (IYS_BRAND_CODE). Sorgulama ile aynı resmi kanalı kullanır. Devletin İYS'sine
+    komisyonsuz, kendi kimliğinle bağlanırsın.
+    """
+    from datetime import datetime
+    tok = await _get_token()
+    if not tok:
+        return {"ok": False, "via": "iys-direct", "status": "no_token",
+                "message": "İYS API kimliği eksik. Secrets Vault → IYS_API_USERNAME / IYS_API_PASSWORD ekleyin."}
+    brand = (IYS_BRAND or (await _netgsm_prov()).get("iys_brand_code") or "").strip()
+    if not brand:
+        return {"ok": False, "via": "iys-direct", "status": "no_brand",
+                "message": "İYS marka kodu eksik (ortam değişkeni IYS_BRAND_CODE)."}
+    body = {
+        "brandCode": brand,
+        "recipient": p.recipient,
+        "recipientType": p.recipient_type,   # BIREYSEL | TACIR
+        "type": p.message_type,              # MESAJ | EPOSTA | ARAMA
+        "status": p.status,                  # ONAY | RET
+        "source": p.source or "HS_WEB",      # İYS kaynak kodu
+        "consentDate": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    try:
+        async with httpx.AsyncClient(timeout=15) as c:
+            r = await c.post(f"{IYS_BASE}/v1/consent/add/json",
+                             headers={"Authorization": f"Bearer {tok}"}, json=body)
+        ok = r.status_code in (200, 201)
+        try:
+            d = r.json()
+        except Exception:
+            d = {"raw": r.text[:300]}
+        # Yerel denetim kaydı (audit) — hangi iznin doğrudan gönderildiğini tut.
+        try:
+            await db.iys_consents.update_one(
+                {"recipient": p.recipient, "type": p.message_type},
+                {"$set": {"recipient": p.recipient, "type": p.message_type,
+                          "status": p.status, "source": body["source"],
+                          "report_channel": "iys-direct", "report_ok": ok,
+                          "consent_date": body["consentDate"],
+                          "reported_at": datetime.now().isoformat()}},
+                upsert=True)
+        except Exception:
+            pass
+        if ok:
+            await _cache_put(p.recipient, p.recipient_type, p.message_type, p.status, body["source"])
+        else:
+            logger.warning(f"İYS direct add failed {r.status_code}: {r.text[:200]}")
+        return {"ok": ok, "via": "iys-direct", "http_status": r.status_code, "response": d}
+    except Exception as e:
+        logger.warning(f"İYS direct add exception: {e}")
+        return {"ok": False, "via": "iys-direct", "error": str(e)}
+
+
 @router.post("/query-batch")
 async def iys_query_batch(queries: List[IYSQuery], _=Depends(require_admin)):
     """Toplu sorgulama (max 50). Pazarlama kampanyaları öncesi izin doğrulama."""
