@@ -19,6 +19,7 @@ export default function Integrations() {
   const [statuses, setStatuses] = useState({
     iyzico: { configured: false, mode: "sandbox" },
     paytr: { configured: false, mode: "sandbox" },
+    odeal: { configured: false, mode: "sandbox" },
     trendyol: { configured: false, mode: "sandbox" },
     hepsiburada: { configured: false, mode: "sandbox" },
     temu: { configured: false, mode: "sandbox" },
@@ -70,6 +71,13 @@ export default function Integrations() {
     merchant_id: "", api_key: "", api_secret: "", mode: "sandbox", is_active: false
   });
   const [paytrTesting, setPaytrTesting] = useState(false);
+
+  // ÖdeAl state (ödeme + e-fatura callback; generic marketplace-settings id="odeal")
+  const [odealModalOpen, setOdealModalOpen] = useState(false);
+  const [odealSettings, setOdealSettings] = useState({
+    merchant_id: "", api_key: "", api_secret: "", callback_secret: "", mode: "sandbox", is_active: false
+  });
+  const [odealTesting, setOdealTesting] = useState(false);
 
   // Cargo providers state (generic)
   const [cargoModalOpen, setCargoModalOpen] = useState(false);
@@ -128,20 +136,22 @@ export default function Integrations() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch integration statuses
-      const [paymentRes, trendyolRes, gibRes, xmlRes, hbRes, temuRes, paytrRes] = await Promise.all([
+      const [paymentRes, trendyolRes, gibRes, xmlRes, hbRes, temuRes, paytrRes, odealRes] = await Promise.all([
         axios.get(`${API}/integrations/payment/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
         axios.get(`${API}/integrations/trendyol/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
         axios.get(`${API}/integrations/dogan/settings`, { headers }).catch(() => ({ data: { enabled: false } })),
         axios.get(`${API}/integrations/xml/status`, { headers }).catch(() => ({ data: { last_sync: null } })),
         axios.get(`${API}/integrations/hepsiburada/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
         axios.get(`${API}/integrations/temu/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
-        axios.get(`${API}/integrations/paytr/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } }))
+        axios.get(`${API}/integrations/paytr/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } })),
+        axios.get(`${API}/integrations/odeal/status`, { headers }).catch(() => ({ data: { configured: false, mode: "sandbox" } }))
       ]);
 
       setStatuses(prev => ({
         ...prev,
         iyzico: paymentRes.data,
         paytr: paytrRes.data,
+        odeal: odealRes.data,
         trendyol: trendyolRes.data,
         hepsiburada: hbRes.data,
         temu: temuRes.data,
@@ -381,6 +391,20 @@ export default function Integrations() {
       actions: [
         { label: "Ayarları Yapılandır", icon: <CreditCard size={16} />, onClick: () => fetchMarketplaceSettings('paytr', setPaytrSettings, setPaytrModalOpen), loading: false },
         { label: "Bağlantı Test Et", icon: <RefreshCw size={16} />, onClick: () => testMarketplaceConnection('paytr', setPaytrTesting), loading: paytrTesting, disabled: !statuses.paytr?.configured }
+      ]
+    },
+    {
+      id: "odeal",
+      name: "ÖdeAl",
+      description: "Ödeme (sanal POS) + ödeme anında otomatik e-Fatura/e-Arşiv. Ödeme ÖdeAl'dan geçince fatura ÖdeAl tarafından kesilip callback ile siparişe işlenir.",
+      icon: <CreditCard className="w-8 h-8" />,
+      status: statuses.odeal,
+      color: "blue",
+      instructions: "ÖdeAl panelinden Merchant ID + API Key/Secret alın. Callback URL'leri: Ödeme → /api/payment/odeal/callback, E-Fatura → /api/einvoice/odeal/callback. Not: Kart çekim ucu ÖdeAl'ın hesaba özel API dökümanını gerektirir.",
+      envKeys: [],
+      actions: [
+        { label: "Ayarları Yapılandır", icon: <CreditCard size={16} />, onClick: () => fetchMarketplaceSettings('odeal', setOdealSettings, setOdealModalOpen), loading: false },
+        { label: "Bağlantı Test Et", icon: <RefreshCw size={16} />, onClick: () => testMarketplaceConnection('odeal', setOdealTesting), loading: odealTesting, disabled: !statuses.odeal?.configured }
       ]
     },
     {
@@ -865,6 +889,71 @@ export default function Integrations() {
             <div className="flex justify-end gap-2 pt-4 border-t">
               <button type="button" onClick={() => setPaytrModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">İptal</button>
               <button data-testid="paytr-save-btn" type="submit" disabled={savingSettings} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
+                {savingSettings ? "Kaydediliyor..." : "Kaydet"}
+              </button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* ÖdeAl Settings Modal */}
+      <Dialog open={odealModalOpen} onOpenChange={setOdealModalOpen}>
+        <DialogContent data-testid="odeal-settings-modal">
+          <DialogHeader>
+            <DialogTitle>ÖdeAl Ayarları (Ödeme + E-Fatura)</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => { e.preventDefault(); saveMarketplaceSettings('odeal', odealSettings, setOdealModalOpen); }} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Merchant ID</label>
+              <input data-testid="odeal-merchant-id" type="text" required value={odealSettings.merchant_id || ''}
+                onChange={(e) => setOdealSettings({ ...odealSettings, merchant_id: e.target.value })}
+                className="w-full border px-3 py-2 rounded text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">API Key</label>
+              <input data-testid="odeal-api-key" type="password" value={odealSettings.api_key || ''}
+                onChange={(e) => setOdealSettings({ ...odealSettings, api_key: e.target.value })}
+                placeholder={odealSettings.api_key === "********" ? "********" : "API Key"}
+                className="w-full border px-3 py-2 rounded text-sm" />
+              <p className="text-xs text-gray-500 mt-1">Sadece güncellemek istediğinizde doldurun</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">API Secret</label>
+              <input data-testid="odeal-api-secret" type="password" value={odealSettings.api_secret || ''}
+                onChange={(e) => setOdealSettings({ ...odealSettings, api_secret: e.target.value })}
+                placeholder={odealSettings.api_secret === "********" ? "********" : "API Secret"}
+                className="w-full border px-3 py-2 rounded text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Callback İmza Anahtarı (opsiyonel)</label>
+              <input data-testid="odeal-callback-secret" type="password" value={odealSettings.callback_secret || ''}
+                onChange={(e) => setOdealSettings({ ...odealSettings, callback_secret: e.target.value })}
+                placeholder={odealSettings.callback_secret === "********" ? "********" : "Callback doğrulama anahtarı"}
+                className="w-full border px-3 py-2 rounded text-sm" />
+              <p className="text-xs text-gray-500 mt-1">ÖdeAl callback imzasını doğrulamak için (varsa)</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Mod</label>
+              <select value={odealSettings.mode || "sandbox"}
+                onChange={e => setOdealSettings({ ...odealSettings, mode: e.target.value })}
+                className="w-full border px-3 py-2 rounded text-sm bg-white">
+                <option value="sandbox">Test (stage)</option>
+                <option value="live">Canlı Mod</option>
+              </select>
+            </div>
+            <label className="flex items-center gap-2 mt-2">
+              <input data-testid="odeal-is-active" type="checkbox" checked={!!odealSettings.is_active}
+                onChange={(e) => setOdealSettings({ ...odealSettings, is_active: e.target.checked })} />
+              <span className="text-sm">Entegrasyon Aktif</span>
+            </label>
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded text-xs text-blue-800 space-y-1">
+              <p><b>Ödeme Callback:</b> <code className="bg-blue-100 px-1 rounded">https://panel.estoril.com.tr/api/payment/odeal/callback</code></p>
+              <p><b>E-Fatura Callback:</b> <code className="bg-blue-100 px-1 rounded">https://panel.estoril.com.tr/api/einvoice/odeal/callback</code></p>
+              <p className="pt-1">Ödeme ÖdeAl'dan geçince fatura otomatik kesilir ve buraya bildirilir. Kart çekim başlatma ucu, ÖdeAl'ın hesaba özel API dökümanı sağlandığında tamamlanır.</p>
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <button type="button" onClick={() => setOdealModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">İptal</button>
+              <button data-testid="odeal-save-btn" type="submit" disabled={savingSettings} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50">
                 {savingSettings ? "Kaydediliyor..." : "Kaydet"}
               </button>
             </div>

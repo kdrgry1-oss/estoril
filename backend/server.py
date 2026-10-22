@@ -570,6 +570,10 @@ from routes.payment import router as payment_router
 api_router.include_router(payment_router)
 from routes.payment_paytr import router as payment_paytr_router
 api_router.include_router(payment_paytr_router)
+from routes.payment_odeal import router as payment_odeal_router
+api_router.include_router(payment_odeal_router)
+from routes.einvoice_odeal import router as einvoice_odeal_router
+api_router.include_router(einvoice_odeal_router)
 
 # Include all route modules
 api_router.include_router(auth_router)

@@ -1807,7 +1807,7 @@ ALLOWED_MARKETPLACES = {
     # cargo providers
     "mng", "aras", "yurtici", "ptt", "hepsijet", "trendyol_express", "surat", "ups", "dhl",
     # payment gateways (generic settings; merchant_id + api_key[=key] + api_secret[=salt])
-    "paytr",
+    "paytr", "odeal",
 }
 @router.get("/{marketplace}/settings")
 async def get_marketplace_settings(marketplace: str, current_user: dict = Depends(require_admin)):
@@ -1833,6 +1833,8 @@ async def get_marketplace_settings(marketplace: str, current_user: dict = Depend
         settings["password"] = "********"
     if settings.get("secret_key"):
         settings["secret_key"] = "********"
+    if settings.get("callback_secret"):
+        settings["callback_secret"] = "********"
     return settings
 @router.post("/{marketplace}/settings")
 async def save_marketplace_settings(marketplace: str, payload: dict, current_user: dict = Depends(require_admin)):
@@ -1848,6 +1850,8 @@ async def save_marketplace_settings(marketplace: str, payload: dict, current_use
             "temu": ["api_key", "api_secret"],
             # PayTR: merchant_id + merchant_key(api_key) + merchant_salt(api_secret)
             "paytr": ["merchant_id", "api_key", "api_secret"],
+            # ÖdeAl: merchant_id + api_key (api_secret/callback_secret opsiyonel)
+            "odeal": ["merchant_id", "api_key"],
         }
         required = fields_by_mp.get(marketplace, ["api_key", "api_secret"])
         missing = []
@@ -1881,6 +1885,9 @@ async def save_marketplace_settings(marketplace: str, payload: dict, current_use
         update_data["password"] = payload.get("password")
     if payload.get("secret_key") and payload.get("secret_key") != "********":
         update_data["secret_key"] = payload.get("secret_key")
+    # ÖdeAl callback imza anahtarı (opsiyonel; secret gibi davran — sadece verilince güncelle)
+    if payload.get("callback_secret") and payload.get("callback_secret") != "********":
+        update_data["callback_secret"] = payload.get("callback_secret")
 
     await db.settings.update_one({"id": marketplace}, {"$set": update_data}, upsert=True)
     return {"success": True, "message": f"{marketplace.capitalize()} ayarları kaydedildi"}
@@ -1901,6 +1908,9 @@ async def get_marketplace_status(marketplace: str):
     elif marketplace == "paytr":
         configured = bool(settings.get("is_active") and settings.get("merchant_id")
                           and settings.get("api_key") and settings.get("api_secret"))
+    elif marketplace == "odeal":
+        configured = bool(settings.get("is_active") and settings.get("merchant_id")
+                          and settings.get("api_key"))
     else:
         configured = bool(settings.get("is_active") and (settings.get("api_key") or settings.get("merchant_id")))
     return {
@@ -2032,6 +2042,15 @@ async def test_marketplace_connection(marketplace: str, current_user: dict = Dep
             if data.get("status") == "success":
                 return {"success": True, "message": f"PayTR bağlantısı başarılı ({'test' if test_mode else 'canlı'} mod)"}
             return {"success": False, "message": f"PayTR kimlik/ayar hatası: {data.get('reason') or str(data)[:200]}"}
+
+        if marketplace == "odeal":
+            mid = (settings.get("merchant_id") or "").strip()
+            key = (settings.get("api_key") or "").strip()
+            if not (mid and key):
+                return {"success": False, "message": "ÖdeAl için Merchant ID ve API Key zorunlu"}
+            # ÖdeAl kart-çekim ucu hesaba özel dökümana bağlı; burada kimlik varlığı doğrulanır.
+            # payment-result ve e-fatura callback'leri aktif. Gerçek çekim ucu döküman gelince.
+            return {"success": True, "message": "ÖdeAl kimlik bilgileri kaydedildi. Ödeme/e-fatura callback'leri hazır; kart çekim ucu için ÖdeAl API dökümanı gerekli."}
 
         # Default fallback for other marketplaces (whatsapp/instagram/site channels etc.)
         if not (settings.get("api_key") or settings.get("username")):
