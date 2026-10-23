@@ -46,7 +46,13 @@ def _norm(s):
 
 
 def _tokens(s):
-    return {t for t in _norm(s).split() if len(t) > 1 and t not in _STOP}
+    # Sayıları KORU (10/30/50 adet, model no ayırt edici); sadece gerçek stopword'leri at.
+    return {t for t in _norm(s).split() if (len(t) > 1 or t.isdigit()) and t not in _STOP}
+
+
+def _qty(s):
+    """İsimdeki sayıları (adet/model) çıkarır — 30 adet ≠ 50 adet ayrımı için."""
+    return {int(n) for n in re.findall(r"\b(\d{1,4})\b", _norm(s))}
 
 
 def _name_score(a, b):
@@ -156,6 +162,14 @@ def main():
             isc = _img_score(_img_url(d), _img_url(best))
             if isc > best_score:
                 best_score, method = isc, f"görsel(ad={method})"
+
+        # GÜVENLİK: ad eşleşmesinde adet/model sayıları ÇAKIŞIYORSA (30≠50) otomatik
+        # birleştirmeyi engelle → "incele"ye düşür (yanlış ürüne barkod atama riski).
+        if best is not None and method.startswith("ad"):
+            qd, qo = _qty(d.get("name")), _qty(best.get("name"))
+            if qd and qo and qd.isdisjoint(qo):
+                best_score = min(best_score, args.name_threshold - 0.01)
+                method += "+adet_farkı"
 
         d_bc = str(d.get("barcode") or "")
         d_sc = str(d.get("stock_code") or "")
