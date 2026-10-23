@@ -136,3 +136,117 @@ async def robots_txt():
         f"Sitemap: {_FRONTEND}/sitemap-cities.xml\n"
     )
     return Response(content=body, media_type="text/plain")
+
+
+# ===========================================================================
+# YEREL SEO İNİŞ SAYFALARI — public, SUNUCU-RENDER (/cihazlar/{slug})
+# ---------------------------------------------------------------------------
+# Sitemap bu URL'leri Google'a bildiriyordu ama hiçbir route servis etmiyordu
+# → hepsi 404 → oto-SEO zarar veriyordu. Bu route, auto_seo_engine'in ürettiği
+# içeriği gerçek, taranabilir HTML olarak yayınlar (title/meta/canonical/H1/
+# içerik/FAQ + LocalBusiness/FAQPage/BreadcrumbList JSON-LD).
+# ===========================================================================
+_PROV_SUFFIX = "-lazer-epilasyon-ve-estetik-cihazlari"
+_DIST_SUFFIX = "-lazer-epilasyon-cihazi"
+
+
+def _slugify_tr(s: str) -> str:
+    table = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosucgiosu")
+    return (s or "").strip().lower().translate(table).replace(" ", "-")
+
+
+@router.get("/cihazlar/{slug}")
+async def local_seo_landing(slug: str):
+    """İl/ilçe yerel SEO iniş sayfası — sunucu-render, taranabilir HTML."""
+    try:
+        from auto_seo_engine import TR_PROVINCES, LocalSEOGenerator
+    except Exception as e:
+        logger.warning(f"[seo] auto_seo_engine yüklenemedi: {e}")
+        return Response(status_code=404, content="Sayfa bulunamadı", media_type="text/plain")
+
+    base = slug
+    if base.endswith(_PROV_SUFFIX):
+        base = base[: -len(_PROV_SUFFIX)]
+    elif base.endswith(_DIST_SUFFIX):
+        base = base[: -len(_DIST_SUFFIX)]
+
+    # İl eşleştir (en uzun önek kazanır) + varsa ilçe
+    prov = None
+    for p in sorted(TR_PROVINCES, key=lambda x: -len(x["slug"])):
+        if base == p["slug"] or base.startswith(p["slug"] + "-"):
+            prov = p
+            break
+    if not prov:
+        return Response(status_code=404, content="Sayfa bulunamadı", media_type="text/plain")
+
+    district = None
+    rest = base[len(prov["slug"]):].lstrip("-")
+    if rest:
+        for d in prov.get("districts", []):
+            if _slugify_tr(d) == rest:
+                district = d
+                break
+
+    page = LocalSEOGenerator.generate_province_page(prov["slug"], district)
+    # Canonical = SERVİS EDİLEN il URL'si (sitemap ile birebir; ilçe → il'e konsolide)
+    canonical = f"{_FRONTEND}/cihazlar/{prov['slug']}{_PROV_SUFFIX}"
+    title = page["seo_title"]
+    desc = page["seo_description"]
+    h1 = page["h1"]
+    intro = page["intro_content"]
+    faqs = page.get("faqs", [])
+    schemas = page.get("schemas", {})
+
+    def esc(s):
+        return html.escape(str(s or ""), quote=True)
+
+    import json as _json
+    ld = []
+    for key in ("local_business", "faq", "breadcrumb"):
+        if schemas.get(key):
+            ld.append('<script type="application/ld+json">' +
+                       _json.dumps(schemas[key], ensure_ascii=False) + '</script>')
+    faq_html = "".join(
+        f'<section class="faq"><h3>{esc(f.get("q"))}</h3><p>{esc(f.get("a"))}</p></section>'
+        for f in faqs
+    )
+
+    page_html = f"""<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{esc(title)}</title>
+<meta name="description" content="{esc(desc)}">
+<link rel="canonical" href="{esc(canonical)}">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{esc(title)}">
+<meta property="og:description" content="{esc(desc)}">
+<meta property="og:url" content="{esc(canonical)}">
+<meta property="og:image" content="{_FRONTEND}/og-estoril.jpg">
+<meta name="twitter:card" content="summary_large_image">
+{"".join(ld)}
+<style>
+body{{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:860px;margin:0 auto;padding:24px 16px;color:#1f2d3a;line-height:1.6}}
+h1{{font-size:1.7rem;line-height:1.3}} h3{{margin:1.2rem 0 .3rem}}
+a.cta{{display:inline-block;background:#2563c9;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;margin:14px 8px 14px 0}}
+.faq{{border-top:1px solid #e6edf4;padding-top:10px}} .lead{{font-size:1.05rem}}
+nav a{{color:#2563c9;text-decoration:none}} footer{{margin-top:32px;color:#6b7b8c;font-size:.9rem}}
+</style>
+</head>
+<body>
+<nav><a href="{_FRONTEND}/">Ana Sayfa</a> › <span>{esc(page.get("loc_display"))}</span></nav>
+<h1>{esc(h1)}</h1>
+<p class="lead">{esc(intro)}</p>
+<p>
+<a class="cta" href="{_FRONTEND}/">Cihazları İncele</a>
+<a class="cta" href="tel:+905433300310" style="background:#0f9d58">Hemen Ara: 0543 330 03 10</a>
+</p>
+<h2>Sık Sorulan Sorular</h2>
+{faq_html}
+<footer>Estoril Cosmetic — {esc(page.get("loc_display"))} ve tüm Türkiye'ye CE belgeli medikal estetik cihaz satışı, kurulum ve teknik servis. İçerik bilgilendirme amaçlıdır.</footer>
+</body>
+</html>"""
+    return Response(content=page_html, media_type="text/html; charset=utf-8",
+                    headers={"Cache-Control": "public, max-age=3600"})
