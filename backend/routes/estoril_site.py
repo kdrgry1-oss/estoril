@@ -119,6 +119,34 @@ async def save_product(index: int, payload: dict, current_user: dict = Depends(r
     return {"success": True, "index": index}
 
 
+import re as _re_seo
+
+_BRAND_SUFFIX = " | Estoril Cosmetic"
+
+def _strip_html(s: str) -> str:
+    """HTML etiketlerini temizle, boşlukları sadeleştir (meta açıklaması için)."""
+    txt = _re_seo.sub(r"<[^>]+>", " ", s or "")
+    txt = txt.replace("&nbsp;", " ").replace("&amp;", "&").replace("&quot;", '"')
+    return _re_seo.sub(r"\s+", " ", txt).strip()
+
+def _auto_meta_title(name: str, existing: str) -> str:
+    """Oto SEO başlığı: admin girmişse onu, yoksa '<ürün> | Estoril Cosmetic' (≤60 krk)."""
+    if existing and existing.strip():
+        return existing.strip()[:60]
+    name = (name or "Ürün").strip()
+    title = name + _BRAND_SUFFIX
+    return title[:60] if len(title) <= 60 else (name[:60 - len(_BRAND_SUFFIX)] + _BRAND_SUFFIX)
+
+def _auto_meta_desc(name: str, desc_html: str, cats: list, existing: str) -> str:
+    """Oto SEO açıklaması: admin girmişse onu, yoksa açıklamadan/kategoriden üret (≤155 krk)."""
+    if existing and existing.strip():
+        return existing.strip()[:160]
+    body = _strip_html(desc_html)
+    if not body:
+        cat = (cats[0].split(" > ")[-1] if cats else "").strip()
+        body = f"{name} — {cat + ' kategorisinde ' if cat else ''}Estoril Cosmetic güvencesiyle. Hızlı kargo, güvenli ödeme."
+    return (body[:152] + "…") if len(body) > 155 else body
+
 @router.get("/storefront-products")
 async def storefront_products():
     cats = {}
@@ -133,12 +161,21 @@ async def storefront_products():
     async for p in db.products.find({}, {"_id": 0}).sort("created_at", 1):
         imgs = [(i.get("url") if isinstance(i, dict) else i) for i in (p.get("images") or [])]
         cids = p.get("category_ids") or ([p.get("category_id")] if p.get("category_id") else [])
+        cat_paths = [x for x in (path_of(c) for c in cids if c) if x]
+        name = p.get("name", "")
+        desc = p.get("description", "")
         out.append({
-            "name": p.get("name", ""), "price": p.get("price"), "sale": p.get("sale_price"),
+            "name": name, "price": p.get("price"), "sale": p.get("sale_price"),
             "stock": (p.get("stock", 0) or 0) > 0,
-            "cats": [x for x in (path_of(c) for c in cids if c) if x],
+            "cats": cat_paths,
             "img": imgs[0] if imgs else "", "imgs": imgs,
-            "desc": p.get("description", ""), "type": "simple",
+            "desc": desc, "type": "simple",
+            # ── Oto SEO alanları (vitrin <title>/<meta>/canonical için) ──
+            "slug": p.get("slug", ""),
+            "sku": p.get("sku") or p.get("barcode") or "",
+            "brand": p.get("brand") or "Estoril Cosmetic",
+            "meta_title": _auto_meta_title(name, p.get("meta_title")),
+            "meta_description": _auto_meta_desc(name, desc, cat_paths, p.get("meta_description")),
         })
     return out
 

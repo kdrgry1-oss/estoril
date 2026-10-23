@@ -7,7 +7,7 @@ include edilir (server.py: app.include_router(seo_router)). Böylece yollar
 /sitemap.xml ve /robots.txt olarak kök seviyede yayınlanır.
 
 sitemap.xml: yayında (is_active) ürünler + kategoriler + statik sayfalar +
-ana sayfa. URL'ler FRONTEND_PUBLIC_URL (varsayılan https://facette.com.tr)
+ana sayfa. URL'ler FRONTEND_PUBLIC_URL (varsayılan https://estoril.com.tr)
 üzerinden üretilir.
 =============================================================================
 """
@@ -21,7 +21,7 @@ from .deps import db, logger
 
 router = APIRouter(tags=["seo"])  # PREFIX YOK — kök seviye
 
-_FRONTEND = (os.environ.get("FRONTEND_PUBLIC_URL") or "https://facette.com.tr").rstrip("/")
+_FRONTEND = (os.environ.get("FRONTEND_PUBLIC_URL") or "https://estoril.com.tr").rstrip("/")
 
 
 def _esc(u: str) -> str:
@@ -121,7 +121,7 @@ async def sitemap_cities_xml():
 
 @router.get("/robots.txt")
 async def robots_txt():
-    """Robots.txt — Ana ve Yerel Sitemap indekslerini içerir."""
+    """Robots.txt — Ana ve Yerel Sitemap indekslerini içerir (estoril.com.tr)."""
     body = (
         "User-agent: *\n"
         "Allow: /\n"
