@@ -19,7 +19,7 @@ import csv
 import logging
 from datetime import datetime, timezone
 
-from routes.deps import admin_required
+from routes.deps import require_admin
 from b2b_lead_scraper import (
     load_all_leads,
     save_leads,
@@ -29,7 +29,7 @@ from b2b_lead_scraper import (
 )
 
 logger = logging.getLogger("b2b_leads_api")
-router = APIRouter(prefix="/api/admin/b2b-leads", tags=["b2b-leads"])
+router = APIRouter(prefix="/admin/b2b-leads", tags=["b2b-leads"])
 
 
 class ScrapeRequest(BaseModel):
