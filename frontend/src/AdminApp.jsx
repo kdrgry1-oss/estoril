@@ -89,6 +89,7 @@ import FooterDesign from "./pages/admin/FooterDesign";
 import MarketplaceProfit from "./pages/admin/MarketplaceProfit";
 import Themes from "./pages/admin/Themes";
 import RooftrExcelUpload from "./pages/admin/RooftrExcelUpload";
+import AutoSeoHub from "./pages/admin/AutoSeoHub";
 
 // Bu Routes, App.js'te "/admin/*" altına mount edilir; bu yüzden yollar
 // /admin'e göreceli yazılır (örn. "urunler" => /admin/urunler).
@@ -180,6 +181,8 @@ export default function AdminApp() {
         <Route path="raporlar/urun" element={<ProductsReport />} />
         <Route path="raporlar/stok" element={<StockReport />} />
         <Route path="raporlar/uye" element={<MembersReport />} />
+        <Route path="seo" element={<Navigate to="/admin/seo/auto" replace />} />
+        <Route path="seo/auto" element={<AutoSeoHub />} />
         <Route path="seo/meta" element={<SeoMeta />} />
         <Route path="seo/yonlendirmeler" element={<SeoRedirects />} />
         <Route path="markalar" element={<Brands />} />

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
-import { FileText, Link2, Plus, Trash2, ArrowRight } from "lucide-react";
+import { FileText, Link2, Plus, Trash2, ArrowRight, Sparkles } from "lucide-react";
 
 const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const authHeaders = () => ({ Authorization: `Bearer ${localStorage.getItem("token")}` });
@@ -28,9 +29,14 @@ export function SeoRedirects() {
   };
   return (
     <div className="space-y-5" data-testid="seo-redirects-page">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2"><Link2 /> 301/302 Yönlendirmeler</h1>
-        <p className="text-sm text-gray-500 mt-1">SEO için eski URL'leri yeni yola yönlendirin.</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><Link2 /> 301/302 Yönlendirmeler</h1>
+          <p className="text-sm text-gray-500 mt-1">SEO için eski URL'leri yeni yola yönlendirin.</p>
+        </div>
+        <Link to="/admin/seo/auto" className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-1.5 transition">
+          <Sparkles size={14} /> Oto SEO Motoru (AI & 81 İl) →
+        </Link>
       </div>
 
       <div className="bg-white rounded-xl border p-5 flex gap-2 items-end flex-wrap">
@@ -101,9 +107,14 @@ export function SeoMeta() {
   };
   return (
     <div className="space-y-5" data-testid="seo-meta-page">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2"><FileText /> SEO Meta Yönetimi</h1>
-        <p className="text-sm text-gray-500 mt-1">Herhangi bir sayfanın title/description/og meta'sını override edin.</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><FileText /> SEO Meta Yönetimi</h1>
+          <p className="text-sm text-gray-500 mt-1">Herhangi bir sayfanın title/description/og meta'sını override edin.</p>
+        </div>
+        <Link to="/admin/seo/auto" className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center gap-1.5 transition">
+          <Sparkles size={14} /> Oto SEO Motoru (AI & 81 İl) →
+        </Link>
       </div>
 
       <div className="bg-white rounded-xl border p-5 space-y-3">

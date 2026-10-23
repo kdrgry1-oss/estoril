@@ -15,6 +15,8 @@ from .upload import router as upload_router
 from .upload import files_router as upload_files_router
 from .settings import router as settings_router
 from .estoril_site import router as estoril_site_router
+from .b2b_leads import router as b2b_leads_router
+from .auto_seo import router as auto_seo_router
 
 __all__ = [
     "auth_router",
@@ -33,4 +35,6 @@ __all__ = [
     "upload_files_router",
     "settings_router",
     "estoril_site_router",
+    "b2b_leads_router",
+    "auto_seo_router",
 ]

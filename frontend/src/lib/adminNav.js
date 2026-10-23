@@ -9,7 +9,7 @@ import {
   Megaphone, FileText, Settings, Palette, Plug, RotateCcw, Store, GitMerge, XCircle, Trash2,
   Cable, Building2, Shield, Factory, Users, Ruler, MessageSquare, PenTool,
   Truck, CreditCard, AlertTriangle, TrendingUp, Link2, BellRing, CheckSquare, Code, Lock, Brain, Mail, Rss,
-  Instagram,
+  Instagram, Sparkles,
 } from "lucide-react";
 
 // Default sıralama (kullanıcı tercihi yoksa kullanılır):
@@ -99,7 +99,7 @@ export const navigationGroups = [
       { label: "Üye Listesi", path: "/admin/uyeler", icon: Users },
       { label: "Üye Grupları (B2B)", path: "/admin/uye-gruplari", icon: Users },
       { label: "Müşteri Segmentleri (RFM)", path: "/admin/musteri-segmentleri", icon: Users },
-      { label: "Hedef Kitle (Reklam)", path: "/admin/hedef-kitle", icon: TrendingUp },
+      { label: "Hedef Kitleler (Google Maps & B2B)", path: "/admin/hedef-kitle", icon: TrendingUp },
       { label: "Müşteri Soruları", path: "/admin/sorular", icon: MessageSquare },
       { label: "Destek Talepleri", path: "/admin/tickets", icon: MessageSquare },
       { label: "Bloklu Müşteriler", path: "/admin/bloklu-musteriler", icon: Users },
@@ -125,6 +125,7 @@ export const navigationGroups = [
     label: "SEO",
     icon: FileText,
     children: [
+      { label: "Oto SEO Motoru (AI & Yerel)", path: "/admin/seo/auto", icon: Sparkles },
       { label: "Meta Yönetimi", path: "/admin/seo/meta", icon: FileText },
       { label: "301 Yönlendirmeler", path: "/admin/seo/yonlendirmeler", icon: Link2 },
     ],

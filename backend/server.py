@@ -43,6 +43,8 @@ from routes import (
     upload_router,
     upload_files_router,
     settings_router,
+    b2b_leads_router,
+    auto_seo_router,
 )
 from routes.vendors import router as vendors_router
 from routes.pages import router as pages_router
@@ -558,6 +560,8 @@ app.add_middleware(ErrorTrackingMiddleware)
 from routes.estoril_site import router as estoril_site_router
 api_router = APIRouter(prefix="/api")
 api_router.include_router(estoril_site_router)
+api_router.include_router(b2b_leads_router)
+api_router.include_router(auto_seo_router)
 
 # Documentation download (public — markdown indir)
 from routes.docs import router as docs_router

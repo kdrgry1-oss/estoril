@@ -73,6 +73,14 @@ async def sitemap_xml():
                 continue
             lm = (prod.get("updated_at") or "")[:10] or today
             urls.append(_url_block(f"{_FRONTEND}/urun/{slug}", lm, "weekly", "0.7"))
+
+        # 81 İl Yerel SEO Sayfaları (Programmatic Local SEO)
+        try:
+            from auto_seo_engine import TR_PROVINCES
+            for p in TR_PROVINCES:
+                urls.append(_url_block(f"{_FRONTEND}/cihazlar/{p['slug']}-lazer-epilasyon-ve-estetik-cihazlari", today, "weekly", "0.8"))
+        except Exception as e:
+            logger.warning(f"[seo] yerel sitemap ekleme hatası: {e}")
     except Exception as e:
         logger.warning(f"[seo] sitemap üretim hatası: {e}")
 
@@ -86,9 +94,34 @@ async def sitemap_xml():
                     headers={"Cache-Control": "public, max-age=3600"})
 
 
+@router.get("/sitemap-cities.xml")
+async def sitemap_cities_xml():
+    """81 il ve büyük ilçelerin yerel SEO iniş sayfaları için özel XML sitemap."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    urls = []
+    try:
+        from auto_seo_engine import TR_PROVINCES
+        for p in TR_PROVINCES:
+            urls.append(_url_block(f"{_FRONTEND}/cihazlar/{p['slug']}-lazer-epilasyon-ve-estetik-cihazlari", today, "weekly", "0.8"))
+            for dist in p.get("districts", [])[:3]:
+                dist_slug = dist.lower().replace("ç", "c").replace("ğ", "g").replace("ı", "i").replace("ö", "o").replace("ş", "s").replace("ü", "u")
+                urls.append(_url_block(f"{_FRONTEND}/cihazlar/{p['slug']}-{dist_slug}-lazer-epilasyon-cihazi", today, "monthly", "0.7"))
+    except Exception as e:
+        logger.warning(f"[seo] sitemap-cities hatası: {e}")
+
+    xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "\n".join(urls)
+        + "\n</urlset>"
+    )
+    return Response(content=xml, media_type="application/xml",
+                    headers={"Cache-Control": "public, max-age=3600"})
+
+
 @router.get("/robots.txt")
 async def robots_txt():
-    """Yedek robots.txt (asıl olan frontend/public/robots.txt — facette.com.tr/robots.txt)."""
+    """Robots.txt — Ana ve Yerel Sitemap indekslerini içerir."""
     body = (
         "User-agent: *\n"
         "Allow: /\n"
@@ -100,5 +133,6 @@ async def robots_txt():
         "Disallow: /odeme-bildirimi\n"
         "Disallow: /admin\n"
         f"Sitemap: {_FRONTEND}/sitemap.xml\n"
+        f"Sitemap: {_FRONTEND}/sitemap-cities.xml\n"
     )
     return Response(content=body, media_type="text/plain")
